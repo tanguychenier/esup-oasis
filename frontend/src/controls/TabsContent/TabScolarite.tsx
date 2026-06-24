@@ -7,7 +7,7 @@
  * @author Julien Lemonnier <julien.lemonnier@u-bordeaux.fr>
  */
 
-import { Avatar, Card, Empty, List, Tooltip } from "antd";
+import { Avatar, Card, Empty, List, Tag, Tooltip } from "antd";
 import React, { ReactElement } from "react";
 import { IInscription, IUtilisateur } from "@api";
 import { getLibellePeriode, isEnCoursSurPeriode } from "@utils/dates";
@@ -61,8 +61,18 @@ export function ScolariteListItem({
         }
         title={
           <div style={{ whiteSpace: "wrap", lineHeight: 1.25 }} className={titleClassName}>
-            <div className="mb-1">{inscription.formation?.libelle}</div>
+            <div className="mb-1">
+              {inscription.formation?.libelle}
+              {inscription.niveau && (
+                <Tag color="blue" style={{ marginLeft: 8 }}>
+                  {inscription.niveau}
+                </Tag>
+              )}
+            </div>
             <ComposanteItem composanteId={inscription.formation?.composante} />
+            {inscription.codeEtape && (
+              <div className="text-secondary fs-08 mt-1">Étape&nbsp;: {inscription.codeEtape}</div>
+            )}
           </div>
         }
         description={getLibellePeriode(inscription.debut, inscription.fin, "MMM")}

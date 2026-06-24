@@ -81,6 +81,9 @@ class ApogeeProvider extends AbstractSiScolDataProvider
                 'niveau' => $row->NIVEAU,
                 'discipline' => $row->LIB_DSI,
                 'diplome' => $row->LIB_DIP,
+                // OBC-3 — code étape (cod_etp) pour exposer le cursus
+                // d'inscription et en dériver le niveau LMD côté API.
+                'codeEtape' => isset($row->COD_ETP) ? trim($row->COD_ETP) : null,
             ];
         }
 
