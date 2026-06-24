@@ -42,6 +42,13 @@ class Inscription
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?DateTimeInterface $fin = null;
 
+    /**
+     * Code étape Apogée (cod_etp), conservé pour exposer le cursus
+     * d'inscription et en dériver le niveau d'études (L1/L2/L3/M1/M2/D1-D3).
+     */
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $codeEtape = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -91,6 +98,18 @@ class Inscription
     public function setFin(DateTimeInterface $fin): self
     {
         $this->fin = DateTime::createFromInterface($fin);
+
+        return $this;
+    }
+
+    public function getCodeEtape(): ?string
+    {
+        return $this->codeEtape;
+    }
+
+    public function setCodeEtape(?string $codeEtape): self
+    {
+        $this->codeEtape = $codeEtape;
 
         return $this;
     }

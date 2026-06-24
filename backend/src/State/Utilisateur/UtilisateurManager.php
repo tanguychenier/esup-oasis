@@ -568,7 +568,10 @@ readonly class UtilisateurManager
                 discipline: $inscription['discipline'],
                 diplome: $inscription['diplome'],
             );
-            $new->setDebut($inscription['debut'])->setFin($inscription['fin'])->setFormation($formation);
+            $new->setDebut($inscription['debut'])
+                ->setFin($inscription['fin'])
+                ->setFormation($formation)
+                ->setCodeEtape($inscription['codeEtape'] ?? null);
 
             $utilisateur->addInscription($new);
         }
