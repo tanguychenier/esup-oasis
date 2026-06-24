@@ -16,7 +16,13 @@ select iae.cod_anu,
        rgi.lib_rgi,
        lib_dip,
        niveau,
-       dsi.lib_dsi
+       dsi.lib_dsi,
+       coalesce(annuelle.lib_ad1, fixe.lib_ad1) as adr_lib_ad1,
+       coalesce(annuelle.lib_ad2, fixe.lib_ad2) as adr_lib_ad2,
+       coalesce(annuelle.lib_ad3, fixe.lib_ad3) as adr_lib_ad3,
+       coalesce(annuelle.cod_bdi, fixe.cod_bdi) as adr_cod_bdi,
+       coalesce(annuelle.lib_vil, fixe.lib_vil) as adr_lib_vil,
+       coalesce(annuelle.cod_pay, fixe.cod_pay) as adr_cod_pay
 from ins_adm_etp iae
          join diplome dip on dip.cod_dip = iae.cod_dip
          left outer join sec_dis_sis sds on sds.cod_sds = dip.cod_sds

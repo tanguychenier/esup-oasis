@@ -32,7 +32,16 @@ export const ScolariteSection: React.FC<ScolariteSectionProps> = ({ utilisateur,
             </Typography.Text>
           </Descriptions.Item>
           <Descriptions.Item label="Régime d'inscription">
-            {utilisateur?.statutEtudiant}
+            {utilisateur?.statutEtudiant || <MinusOutlined />}
+          </Descriptions.Item>
+          <Descriptions.Item label="Inscription administrative">
+            {utilisateur?.statutInscriptionAdministrative === "EN_COURS" ? (
+              "En cours"
+            ) : utilisateur?.statutInscriptionAdministrative === "TERMINEE" ? (
+              "Terminée"
+            ) : (
+              <MinusOutlined />
+            )}
           </Descriptions.Item>
           <Descriptions.Item label="Inscriptions" styles={{ label: { width: 200 } }}>
             <h3 className="sr-only">Inscriptions</h3>
