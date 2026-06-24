@@ -63,6 +63,14 @@
             page-break-inside: avoid;
         }
 
+        .categorie-titre {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 14px;
+            margin-bottom: 4px;
+            text-decoration: underline;
+        }
+
         footer {
             width: 100%;
             height: 80px;
@@ -124,22 +132,57 @@
             plusieurs aménagements d'épreuves au titre de l'année universitaire {{ data.annee }}/{{ data.annee + 1 }}.
         </p>
 
+        {% set etudes = data.amenagementsParCategorie.etudes %}
+        {% set aidesHumaines = data.amenagementsParCategorie.aidesHumaines %}
+        {% set examens = data.amenagementsParCategorie.examens %}
+        {% set total = etudes|length + aidesHumaines|length + examens|length %}
+
         <div class="amenagements">
             Je vous informe que j'ai pris la décision de vous accorder le bénéfice
-            {{ data.amenagements|length > 1 ? "des aménagements suivants" : "de l'aménagement suivant" }}&nbsp;:
-            <ul>
-                {% for amenagement in data.amenagements %}
-                    <li class="page-break-avoid">{{ amenagement.type.libelleLong|default(amenagement.type.libelle) }}
-                        {% if amenagement.commentaire != null %}
-                            <br/> {{ amenagement.commentaire|nl2br }}
-                        {% endif %}
-                    </li>
-                {% endfor %}
-            </ul>
+            {{ total > 1 ? "des aménagements suivants" : "de l'aménagement suivant" }}&nbsp;:
+
+            {% if etudes|length > 0 %}
+                <h3 class="categorie-titre">Aménagements d'études</h3>
+                <ul class="categorie-etudes">
+                    {% for amenagement in etudes %}
+                        <li class="page-break-avoid">{{ amenagement.type.libelleLong|default(amenagement.type.libelle) }}
+                            {% if amenagement.commentaire != null %}
+                                <br/> {{ amenagement.commentaire|nl2br }}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if aidesHumaines|length > 0 %}
+                <h3 class="categorie-titre">Aides humaines</h3>
+                <ul class="categorie-aides-humaines">
+                    {% for amenagement in aidesHumaines %}
+                        <li class="page-break-avoid">{{ amenagement.type.libelleLong|default(amenagement.type.libelle) }}
+                            {% if amenagement.commentaire != null %}
+                                <br/> {{ amenagement.commentaire|nl2br }}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if examens|length > 0 %}
+                <h3 class="categorie-titre">Aménagements d'examens</h3>
+                <ul class="categorie-examens">
+                    {% for amenagement in examens %}
+                        <li class="page-break-avoid">{{ amenagement.type.libelleLong|default(amenagement.type.libelle) }}
+                            {% if amenagement.commentaire != null %}
+                                <br/> {{ amenagement.commentaire|nl2br }}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
         </div>
 
         <div class="page-break-avoid">
-            <p>Le bénéfice {{ data.amenagements|length > 1 ? "des aménagements" : "de l'aménagement" }}
+            <p>Le bénéfice {{ total > 1 ? "des aménagements" : "de l'aménagement" }}
                 vous est accordé sous réserve des évolutions matérielles ou techniques ou de la
                 particularité de certains examens.</p>
             <p>La reconduction de cette décision au-delà de l'année universitaire {{ data.annee }}/{{ data.annee + 1 }}

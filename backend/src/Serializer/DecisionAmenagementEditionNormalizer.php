@@ -40,13 +40,15 @@ readonly class DecisionAmenagementEditionNormalizer implements NormalizerInterfa
      */
     public function normalize(mixed $object, ?string $format = null, array $context = []): array
     {
-        //On génère un tableau contenant l'état de la décision + tous les aménagements d'examen concernés
+        //On génère un tableau contenant l'état de la décision + tous les aménagements actifs,
+        //regroupés par catégorie (études / aides humaines / examens).
         $data[0] = $object;
 
         $entity = $this->decisionAmenagementManager->parUidEtAnnee($object->uid, $object->annee);
-        $data['amenagements'] = array_filter($entity
-            ->getBeneficiaire()
-            ->getAmenagementsActifs(), fn($amenagement) => $amenagement->getType()->isExamens());
+        $amenagementsActifs = $entity->getBeneficiaire()->getAmenagementsActifs();
+
+        $data['amenagements'] = $amenagementsActifs;
+        $data['amenagementsParCategorie'] = $this->groupByCategorie($amenagementsActifs);
 
         $data['annee'] = $this->anneeDuJour($this->now());
         $data['president']['qualite'] = $this->parametreRepository
@@ -114,5 +116,31 @@ readonly class DecisionAmenagementEditionNormalizer implements NormalizerInterfa
         }
 
         return [DecisionAmenagementExamens::class => false];
+    }
+
+    /**
+     * @param iterable<\App\Entity\Amenagement> $amenagements
+     * @return array{etudes: list<\App\Entity\Amenagement>, aidesHumaines: list<\App\Entity\Amenagement>, examens: list<\App\Entity\Amenagement>}
+     */
+    public function groupByCategorie(iterable $amenagements): array
+    {
+        $groupes = ['etudes' => [], 'aidesHumaines' => [], 'examens' => []];
+        foreach ($amenagements as $amenagement) {
+            $type = $amenagement->getType();
+            if ($type === null) {
+                continue;
+            }
+            if ($type->isPedagogique()) {
+                $groupes['etudes'][] = $amenagement;
+            }
+            if ($type->isAideHumaine()) {
+                $groupes['aidesHumaines'][] = $amenagement;
+            }
+            if ($type->isExamens()) {
+                $groupes['examens'][] = $amenagement;
+            }
+        }
+
+        return $groupes;
     }
 }
