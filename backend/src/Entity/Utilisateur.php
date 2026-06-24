@@ -247,6 +247,10 @@ class Utilisateur implements UserInterface
     #[Map(if: false)]
     private ?bool $gestionnaire = false;
 
+    #[ORM\Embedded(class: Adresse::class, columnPrefix: 'adresse_')]
+    #[Map(if: false)]
+    private Adresse $adresse;
+
     public function __construct()
     {
         $this->beneficiaires = new ArrayCollection();
@@ -266,6 +270,7 @@ class Utilisateur implements UserInterface
         $this->decisionsAmenagementExamens = new ArrayCollection();
         $this->piecesJointes = new ArrayCollection();
         $this->bilans = new ArrayCollection();
+        $this->adresse = new Adresse();
     }
 
     public function getId(): ?int
@@ -1240,6 +1245,37 @@ class Utilisateur implements UserInterface
         $this->statutEtudiant = $statutEtudiant;
 
         return $this;
+    }
+
+    public function getAdresse(): Adresse
+    {
+        return $this->adresse;
+    }
+
+    public function setAdresse(Adresse $adresse): static
+    {
+        $this->adresse = $adresse;
+
+        return $this;
+    }
+
+    /**
+     * Statut d'inscription administrative dérivé des inscriptions :
+     * "EN_COURS" tant qu'au moins une inscription couvre la date courante,
+     * "TERMINEE" sinon. Renvoyé en lecture seule via l'API.
+     */
+    public function getStatutInscriptionAdministrative(): string
+    {
+        $now = $this->now();
+        foreach ($this->getInscriptions() as $inscription) {
+            $debut = $inscription->getDebut();
+            $fin = $inscription->getFin();
+            if ($debut !== null && $debut <= $now && ($fin === null || $fin > $now)) {
+                return 'EN_COURS';
+            }
+        }
+
+        return 'TERMINEE';
     }
 
     public function getNumeroAnonyme(): ?int
