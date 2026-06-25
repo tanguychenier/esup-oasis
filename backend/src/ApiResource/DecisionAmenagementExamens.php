@@ -107,6 +107,17 @@ class DecisionAmenagementExamens
         }
     }
 
+    #[Groups([self::GROUP_OUT, self::GROUP_IN])]
+    public ?string $observations {
+        get {
+            $prop = new ReflectionProperty(self::class, 'observations');
+            if (!$prop->isInitialized($this) && $this->entity !== null) {
+                $this->observations = $this->entity->getObservations();
+            }
+            return $this->observations ?? null;
+        }
+    }
+
     public function __construct(
         private readonly ?\App\Entity\DecisionAmenagementExamens $entity = null,
     ) {}

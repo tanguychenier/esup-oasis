@@ -3280,10 +3280,12 @@ export interface components {
         };
         "DecisionAmenagementExamens-decision.in.jsonMergePatch": {
             etat?: string;
+            observations?: string | null;
         };
         "DecisionAmenagementExamens.html-decision.out": {
             etat?: string;
             urlContenu?: string | null;
+            observations?: string | null;
         };
         "DecisionAmenagementExamens.html-utilisateur.out": {
             etat?: string;
@@ -3291,6 +3293,7 @@ export interface components {
         "DecisionAmenagementExamens.jsonld-decision.out": components["schemas"]["HydraItemBaseSchema"] & {
             etat?: string;
             urlContenu?: string | null;
+            observations?: string | null;
         };
         "DecisionAmenagementExamens.jsonld-utilisateur.out": components["schemas"]["HydraItemBaseSchema"] & {
             etat?: string;
@@ -3298,6 +3301,7 @@ export interface components {
         "DecisionAmenagementExamens.pdf-decision.out": {
             etat?: string;
             urlContenu?: string | null;
+            observations?: string | null;
         };
         "Demande-demande.in": {
             /**

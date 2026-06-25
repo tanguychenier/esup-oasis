@@ -71,6 +71,11 @@
             text-decoration: underline;
         }
 
+        .observations {
+            margin-top: 14px;
+            page-break-inside: avoid;
+        }
+
         footer {
             width: 100%;
             height: 80px;
@@ -113,6 +118,14 @@
         <div class="destinataire">
             <b>{{ premierBeneficiaire.utilisateur.nom|upper }} {{ premierBeneficiaire.utilisateur.prenom }}</b>
             <br/>
+            {% if premierBeneficiaire.utilisateur.dateNaissance is defined and premierBeneficiaire.utilisateur.dateNaissance is not null %}
+                Né(e) le {{ premierBeneficiaire.utilisateur.dateNaissance|date('d/m/Y') }}
+                <br/>
+            {% endif %}
+            {% if premierBeneficiaire.utilisateur.numeroEtudiant is defined and premierBeneficiaire.utilisateur.numeroEtudiant is not null %}
+                N° étudiant : {{ premierBeneficiaire.utilisateur.numeroEtudiant }}
+                <br/>
+            {% endif %}
             {{ premierBeneficiaire.utilisateur.email }}
             <div class="date-lieu">
                 Talence, le {{ "now"|date("d/m/Y") }}
@@ -179,7 +192,15 @@
                     {% endfor %}
                 </ul>
             {% endif %}
+
         </div>
+
+        {% if data.observations is defined and data.observations is not null and data.observations|trim != '' %}
+            <section class="observations">
+                <h3 class="categorie-titre">Observations particulières</h3>
+                <p>{{ data.observations|nl2br }}</p>
+            </section>
+        {% endif %}
 
         <div class="page-break-avoid">
             <p>Le bénéfice {{ total > 1 ? "des aménagements" : "de l'aménagement" }}

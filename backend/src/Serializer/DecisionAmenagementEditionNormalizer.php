@@ -49,6 +49,7 @@ readonly class DecisionAmenagementEditionNormalizer implements NormalizerInterfa
 
         $data['amenagements'] = $amenagementsActifs;
         $data['amenagementsParCategorie'] = $this->groupByCategorie($amenagementsActifs);
+        $data['observations'] = $entity->getObservations();
 
         $data['annee'] = $this->anneeDuJour($this->now());
         $data['president']['qualite'] = $this->parametreRepository

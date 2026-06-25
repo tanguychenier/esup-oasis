@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\Templates;
 
 use App\Entity\Amenagement;
+use App\Entity\Beneficiaire;
 use App\Entity\TypeAmenagement;
+use App\Entity\Utilisateur;
 use PHPUnit\Framework\TestCase;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
@@ -74,6 +76,70 @@ final class PaehTemplateTest extends TestCase
         self::assertStringContainsString("<title>Décision d'établissement</title>", $html);
     }
 
+    public function testTemplateRendersObservationsBlockWhenProvided(): void
+    {
+        $html = $this->renderWith(
+            etudes: [$this->amenagement('Tiers-temps en cours', pedagogique: true)],
+            aidesHumaines: [],
+            examens: [],
+            observations: "Suivi médical à prévoir.\nContact prochain semestre.",
+        );
+
+        self::assertStringContainsString('Observations particulières', $html);
+        self::assertStringContainsString('Suivi médical à prévoir.', $html);
+        self::assertStringContainsString('Contact prochain semestre.', $html);
+        self::assertStringContainsString('<section class="observations">', $html);
+    }
+
+    public function testTemplateHidesObservationsBlockWhenNullOrEmpty(): void
+    {
+        $htmlNull = $this->renderWith(
+            etudes: [$this->amenagement('Tiers-temps en cours', pedagogique: true)],
+            aidesHumaines: [],
+            examens: [],
+            observations: null,
+        );
+        $htmlBlank = $this->renderWith(
+            etudes: [$this->amenagement('Tiers-temps en cours', pedagogique: true)],
+            aidesHumaines: [],
+            examens: [],
+            observations: "   \n  ",
+        );
+
+        self::assertStringNotContainsString('Observations particulières', $htmlNull);
+        self::assertStringNotContainsString('<section class="observations">', $htmlNull);
+        self::assertStringNotContainsString('Observations particulières', $htmlBlank);
+        self::assertStringNotContainsString('<section class="observations">', $htmlBlank);
+    }
+
+    public function testDestinataireRendersBirthDateAndStudentNumberWhenPresent(): void
+    {
+        $html = $this->renderWith(
+            etudes: [],
+            aidesHumaines: [],
+            examens: [$this->amenagement('Tiers-temps aux examens', examens: true)],
+            dateNaissance: new \DateTimeImmutable('2002-04-15'),
+            numeroEtudiant: '21800123',
+        );
+
+        self::assertStringContainsString('Né(e) le 15/04/2002', $html);
+        self::assertStringContainsString('N° étudiant : 21800123', $html);
+    }
+
+    public function testDestinataireOmitsBirthDateAndStudentNumberWhenAbsent(): void
+    {
+        $html = $this->renderWith(
+            etudes: [],
+            aidesHumaines: [],
+            examens: [$this->amenagement('Tiers-temps aux examens', examens: true)],
+            dateNaissance: null,
+            numeroEtudiant: null,
+        );
+
+        self::assertStringNotContainsString('Né(e) le', $html);
+        self::assertStringNotContainsString('N° étudiant', $html);
+    }
+
     /**
      * @param list<Amenagement> $etudes
      * @param list<Amenagement> $aidesHumaines
@@ -83,19 +149,43 @@ final class PaehTemplateTest extends TestCase
         array $etudes,
         array $aidesHumaines,
         array $examens,
+        ?string $observations = null,
+        ?\DateTimeInterface $dateNaissance = null,
+        int|string|null $numeroEtudiant = null,
     ): string {
-        $beneficiaire = (object)[
-            'utilisateur' => (object)['nom' => 'DOE', 'prenom' => 'Jane', 'email' => 'jane@example.org'],
-            'gestionnaire' => (object)['prenom' => 'Alice', 'nom' => 'Dupont', 'email' => 'alice@example.org'],
-        ];
+        $etudiant = (new Utilisateur())
+            ->setNom('DOE')
+            ->setPrenom('Jane')
+            ->setEmail('jane@example.org');
+        if ($dateNaissance !== null) {
+            $etudiant->setDateNaissance($dateNaissance);
+        }
+        if ($numeroEtudiant !== null) {
+            $etudiant->setNumeroEtudiant((int) $numeroEtudiant);
+        }
+
+        $gestionnaire = (new Utilisateur())
+            ->setNom('Dupont')
+            ->setPrenom('Alice')
+            ->setEmail('alice@example.org');
+
+        $beneficiaire = (new Beneficiaire())
+            ->setUtilisateur($etudiant)
+            ->setGestionnaire($gestionnaire);
+
+        // Header reads premierAmenagement.beneficiaires|first — attach the beneficiary
+        // to a header-only amenagement that is NOT exposed in categories.
+        $headerAmenagement = $this->amenagement('__header__');
+        $headerAmenagement->addBeneficiaire($beneficiaire);
 
         $data = [
-            'amenagements' => [...$etudes, ...$aidesHumaines, ...$examens],
+            'amenagements' => [$headerAmenagement, ...$etudes, ...$aidesHumaines, ...$examens],
             'amenagementsParCategorie' => [
                 'etudes' => $etudes,
                 'aidesHumaines' => $aidesHumaines,
                 'examens' => $examens,
             ],
+            'observations' => $observations,
             'annee' => 2026,
             'president' => ['qualite' => 'Le President', 'nom' => 'P. NOMME'],
             'responsable_phase' => [
@@ -103,10 +193,6 @@ final class PaehTemplateTest extends TestCase
                 'nom' => 'R. NOMME',
                 'signature' => ['contents' => null, 'mimeType' => null],
             ],
-        ];
-        // Element [0] is read by the header to extract beneficiary info — emulate that shape.
-        $data[0] = (object)[
-            'amenagements' => [(object)['beneficiaires' => [$beneficiaire]]],
         ];
 
         // Stub Symfony's `app` Twig global only with the env value the template reads.
