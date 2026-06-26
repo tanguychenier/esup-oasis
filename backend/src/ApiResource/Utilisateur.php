@@ -566,6 +566,44 @@ final class Utilisateur
         }
     }
 
+    /**
+     * OBC-1 — Code situation sociale Apogée (ins_adm_anu.cod_soc) :
+     * 'NO' (non boursier), 'BO' (boursier d'État), 'PU' (pupille), etc.
+     * Le booléen {@see self::$boursier} reste exposé pour compatibilité
+     * upstream et est dérivé de `code === 'BO'`.
+     */
+    #[Groups([self::GROUP_OUT])]
+    #[ApiProperty(
+        security: "object == null or object.uid == user.getUserIdentifier() or is_granted('ROLE_PLANIFICATEUR')",
+    )]
+    public ?string $codeSituationSociale {
+        get {
+            $prop = new ReflectionProperty(self::class, 'codeSituationSociale');
+            if (!$prop->isInitialized($this) && $this->entity !== null) {
+                $this->codeSituationSociale = $this->entity->getCodeSituationSociale();
+            }
+            return $this->codeSituationSociale ?? null;
+        }
+    }
+
+    /**
+     * OBC-1 — Libellé situation sociale Apogée (sit_sociale.lib_soc), pour
+     * affichage tel quel dans le profil administratif.
+     */
+    #[Groups([self::GROUP_OUT])]
+    #[ApiProperty(
+        security: "object == null or object.uid == user.getUserIdentifier() or is_granted('ROLE_PLANIFICATEUR')",
+    )]
+    public ?string $libelleSituationSociale {
+        get {
+            $prop = new ReflectionProperty(self::class, 'libelleSituationSociale');
+            if (!$prop->isInitialized($this) && $this->entity !== null) {
+                $this->libelleSituationSociale = $this->entity->getLibelleSituationSociale();
+            }
+            return $this->libelleSituationSociale ?? null;
+        }
+    }
+
     #[Groups([self::GROUP_OUT])]
     #[ApiProperty(
         security: "object == null or object.uid == user.getUserIdentifier() or is_granted('ROLE_PLANIFICATEUR')",

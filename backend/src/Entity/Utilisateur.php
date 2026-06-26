@@ -220,6 +220,23 @@ class Utilisateur implements UserInterface
     #[Map(if: false)]
     private ?bool $boursier = null;
 
+    /**
+     * OBC-1 — Code situation sociale Apogée (ins_adm_anu.cod_soc).
+     * Valeurs connues : 'NO' (non boursier), 'BO' (boursier d'État), 'PU' (pupille),
+     * etc. La valeur `boursier` (booléen, conservé pour compatibilité upstream) est
+     * dérivée de ce code via {@see self::setSituationSociale()}.
+     */
+    #[ORM\Column(length: 2, nullable: true)]
+    #[Map(if: false)]
+    private ?string $codeSituationSociale = null;
+
+    /**
+     * OBC-1 — Libellé situation sociale Apogée (sit_sociale.lib_soc), pour affichage.
+     */
+    #[ORM\Column(length: 50, nullable: true)]
+    #[Map(if: false)]
+    private ?string $libelleSituationSociale = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     #[Map(if: false)]
     private ?string $statutEtudiant = null;
@@ -1231,6 +1248,33 @@ class Utilisateur implements UserInterface
     public function setBoursier(?bool $boursier): static
     {
         $this->boursier = $boursier;
+
+        return $this;
+    }
+
+    public function getCodeSituationSociale(): ?string
+    {
+        return $this->codeSituationSociale;
+    }
+
+    public function getLibelleSituationSociale(): ?string
+    {
+        return $this->libelleSituationSociale;
+    }
+
+    /**
+     * OBC-1 — Met à jour le couple (code, libellé) situation sociale Apogée et
+     * dérive le booléen `boursier` (conservé pour compatibilité upstream) :
+     *   - cod_soc === 'BO' => boursier = true
+     *   - tout autre code  => boursier = false
+     *   - code null/vide   => boursier = null (inconnu)
+     */
+    public function setSituationSociale(?string $code, ?string $libelle): static
+    {
+        $code = ($code === null || trim($code) === '') ? null : trim($code);
+        $this->codeSituationSociale = $code;
+        $this->libelleSituationSociale = ($libelle === null || trim($libelle) === '') ? null : trim($libelle);
+        $this->boursier = $code === null ? null : ($code === 'BO');
 
         return $this;
     }

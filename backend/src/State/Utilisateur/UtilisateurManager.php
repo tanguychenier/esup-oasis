@@ -523,19 +523,29 @@ readonly class UtilisateurManager
             usort($inscriptions, fn($a, $b) => $a['debut'] <=> $b['debut']);
 
             $last = array_key_last($inscriptions);
-            $utilisateur->setBoursier($inscriptions[$last]['boursier'] ?? false);
+            // OBC-1 (Fatiha) — la source autoritative est désormais le code situation sociale
+            // Apogée (cod_soc) ; le booléen `boursier` est dérivé via setSituationSociale().
+            $utilisateur->setSituationSociale(
+                $inscriptions[$last]['codeSituationSociale'] ?? null,
+                $inscriptions[$last]['libelleSituationSociale'] ?? null,
+            );
             $utilisateur->setStatutEtudiant($inscriptions[$last]['statut'] ?? '');
 
-            // OBC-1 — projection de l'adresse Apogée la plus récente vers Utilisateur::adresse.
-            // Les lignes ligne2 (Apogée AD2) et complement (AD3) sont concaténées sur la même ligne
-            // d'affichage car notre modèle ne porte que ligne1/ligne2.
+            // OBC-1 — projection de l'adresse Apogée la plus récente (adresse annuelle uniquement)
+            // vers Utilisateur::adresse. Ligne2 (AD2) et complément (AD3) sont concaténés sur la
+            // même ligne d'affichage car notre modèle ne porte que ligne1/ligne2.
+            // Le libellé pays préféré est libelle Apogée (pays.lib_pay) ; à défaut, code pays brut.
             $adresse = $utilisateur->getAdresse();
             $adresse->setLigne1($inscriptions[$last]['adresseLigne1'] ?? null);
             $complement = trim(($inscriptions[$last]['adresseLigne2'] ?? '') . ' ' . ($inscriptions[$last]['adresseComplement'] ?? ''));
             $adresse->setLigne2($complement === '' ? null : $complement);
             $adresse->setCodePostal($inscriptions[$last]['adresseCodePostal'] ?? null);
             $adresse->setVille($inscriptions[$last]['adresseVille'] ?? null);
-            $adresse->setPays($inscriptions[$last]['adressePays'] ?? null);
+            $adresse->setPays(
+                $inscriptions[$last]['adressePays']
+                    ?? $inscriptions[$last]['adresseCodePays']
+                    ?? null,
+            );
         }
 
         //supprimer les disparues

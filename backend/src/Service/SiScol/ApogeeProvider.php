@@ -69,6 +69,8 @@ class ApogeeProvider extends AbstractSiScolDataProvider
             $numTel = $row->NUM_TEL;
             $dateNai = $row->DATE_NAI_IND;
             $codSexEtu = $row->COD_SEX_ETU;
+            $codSoc = isset($row->COD_SOC) ? trim((string) $row->COD_SOC) : null;
+            $codSoc = ($codSoc === null || $codSoc === '') ? null : $codSoc;
             $formations[] = [
                 'codeFormation' => $row->COD_ETP . '#' . $row->COD_VRS_VET,
                 'libFormation' => $row->LIB_WEB_VET,
@@ -76,18 +78,24 @@ class ApogeeProvider extends AbstractSiScolDataProvider
                 'libComposante' => $row->LIB_CMP,
                 'debut' => new DateTime($row->COD_ANU . '-09-01'),
                 'fin' => new DateTime(($row->COD_ANU + 1) . '-08-31'),
-                'boursier' => $row->TEM_BRS_IAA == 'O',
+                // OBC-1 — situation sociale Apogée (NO/BO/PU...) ; boursier dérivé de COD_SOC = 'BO'.
+                'codeSituationSociale' => $codSoc,
+                'libelleSituationSociale' => isset($row->LIB_SOC) ? trim($row->LIB_SOC) : null,
+                'boursier' => $codSoc === 'BO',
                 'statut' => $row->LIB_RGI, //changement de dernière minute... on colle le régime dans le champ "statut"
                 'niveau' => $row->NIVEAU,
                 'discipline' => $row->LIB_DSI,
                 'diplome' => $row->LIB_DIP,
-                // OBC-1 — adresse postale (annuelle puis fixe en fallback)
+                // OBC-1 — adresse postale annuelle uniquement (pas de fallback adresse fixe).
+                // Pour les adresses à l'étranger : la ville d'acheminement est portée par
+                // commune.lib_com (France) ou, à défaut, par adresse.lib_ade (étranger).
                 'adresseLigne1' => isset($row->ADR_LIB_AD1) ? trim($row->ADR_LIB_AD1) : null,
                 'adresseLigne2' => isset($row->ADR_LIB_AD2) ? trim($row->ADR_LIB_AD2) : null,
                 'adresseComplement' => isset($row->ADR_LIB_AD3) ? trim($row->ADR_LIB_AD3) : null,
                 'adresseCodePostal' => isset($row->ADR_COD_BDI) ? trim($row->ADR_COD_BDI) : null,
                 'adresseVille' => isset($row->ADR_LIB_VIL) ? trim($row->ADR_LIB_VIL) : null,
-                'adressePays' => isset($row->ADR_COD_PAY) ? trim($row->ADR_COD_PAY) : null,
+                'adresseCodePays' => isset($row->ADR_COD_PAY) ? trim($row->ADR_COD_PAY) : null,
+                'adressePays' => isset($row->ADR_LIB_PAY) ? trim($row->ADR_LIB_PAY) : null,
             ];
         }
 
