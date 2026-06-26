@@ -122,6 +122,66 @@ final class Inscription
         }
     }
 
+    /**
+     * OBC-3 — compteur Apogée `nbr_ins_etp` (nombre d'inscriptions à
+     * l'étape). Brique de base de la règle officielle de redoublement
+     * désignée par la DSI (mail Fatiha juin 2026).
+     */
+    #[Groups([Utilisateur::GROUP_OUT, Demande::GROUP_OUT, Utilisateur::AMENAGEMENTS_UTILISATEURS_OUT])]
+    public ?int $nbrInsEtp {
+        get {
+            $prop = new ReflectionProperty(self::class, 'nbrInsEtp');
+            if (!$prop->isInitialized($this) && $this->entity !== null) {
+                $this->nbrInsEtp = $this->entity->getNbrInsEtp();
+            }
+            return $this->nbrInsEtp ?? null;
+        }
+    }
+
+    /**
+     * OBC-3 — cursus aménagé Apogée associé à l'inscription. Renvoie un
+     * tableau {code, libelle} dérivé de `cod_sis_cur_amg` / `lib_cur_amg`
+     * (joints depuis la table `cursus_amg`), ou null si l'étudiant n'est
+     * pas en cursus aménagé. La présence d'un cursus aménagé écarte le
+     * redoublement (parcours pluri-annuel négocié).
+     *
+     * @var array{code: string, libelle: ?string}|null
+     */
+    #[Groups([Utilisateur::GROUP_OUT, Demande::GROUP_OUT, Utilisateur::AMENAGEMENTS_UTILISATEURS_OUT])]
+    public ?array $cursusAmenage {
+        get {
+            $prop = new ReflectionProperty(self::class, 'cursusAmenage');
+            if (!$prop->isInitialized($this) && $this->entity !== null) {
+                $code = $this->entity->getCodeSisCurAmg();
+                $this->cursusAmenage = ($code !== null && trim($code) !== '')
+                    ? ['code' => $code, 'libelle' => $this->entity->getLibCurAmg()]
+                    : null;
+            }
+            return $this->cursusAmenage ?? null;
+        }
+    }
+
+    /**
+     * OBC-3 — flag dérivé : l'étudiant redouble cette étape ?
+     *
+     * Calcul délégué à `RedoublementCalculator`, appliquant la règle
+     * officielle DSI (mail Fatiha 2026-06) : `nbrInsEtp > 1` ET pas de
+     * `cod_sis_cur_amg` (cursus aménagé). La valeur est dérivée à la
+     * volée et n'est jamais persistée — toute évolution de la règle
+     * porte uniquement sur le service.
+     */
+    #[Groups([Utilisateur::GROUP_OUT, Demande::GROUP_OUT, Utilisateur::AMENAGEMENTS_UTILISATEURS_OUT])]
+    public bool $redoublant {
+        get {
+            $prop = new ReflectionProperty(self::class, 'redoublant');
+            if (!$prop->isInitialized($this)) {
+                $this->redoublant = $this->entity !== null
+                    && (new \App\Service\SiScol\RedoublementCalculator())->isRedoublant($this->entity);
+            }
+            return $this->redoublant;
+        }
+    }
+
     public function __construct(
         private readonly ?\App\Entity\Inscription $entity = null,
     ) {}

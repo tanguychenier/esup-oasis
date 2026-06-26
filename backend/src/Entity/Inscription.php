@@ -49,6 +49,30 @@ class Inscription
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $codeEtape = null;
 
+    /**
+     * Compteur Apogée NBR_INS_ETP : nombre d'inscriptions cumulées de
+     * l'étudiant à l'étape (cod_etp). Source officielle (mail DSI Fatiha
+     * 2026-06) pour qualifier le redoublement.
+     */
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    private ?int $nbrInsEtp = null;
+
+    /**
+     * Code SISE national du cursus aménagé (cod_sis_cur_amg). Renseigné
+     * pour les étudiants engagés dans un cursus aménagé Apogée — auquel
+     * cas un compteur d'inscriptions > 1 ne correspond pas à un
+     * redoublement mais à un parcours pluri-annuel négocié.
+     */
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $codeSisCurAmg = null;
+
+    /**
+     * Libellé Apogée du cursus aménagé (lib_cur_amg) joint à
+     * `cod_sis_cur_amg`, exposé pour l'affichage côté API.
+     */
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $libCurAmg = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -110,6 +134,42 @@ class Inscription
     public function setCodeEtape(?string $codeEtape): self
     {
         $this->codeEtape = $codeEtape;
+
+        return $this;
+    }
+
+    public function getNbrInsEtp(): ?int
+    {
+        return $this->nbrInsEtp;
+    }
+
+    public function setNbrInsEtp(?int $nbrInsEtp): self
+    {
+        $this->nbrInsEtp = $nbrInsEtp;
+
+        return $this;
+    }
+
+    public function getCodeSisCurAmg(): ?string
+    {
+        return $this->codeSisCurAmg;
+    }
+
+    public function setCodeSisCurAmg(?string $codeSisCurAmg): self
+    {
+        $this->codeSisCurAmg = $codeSisCurAmg;
+
+        return $this;
+    }
+
+    public function getLibCurAmg(): ?string
+    {
+        return $this->libCurAmg;
+    }
+
+    public function setLibCurAmg(?string $libCurAmg): self
+    {
+        $this->libCurAmg = $libCurAmg;
 
         return $this;
     }

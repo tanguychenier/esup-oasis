@@ -3905,6 +3905,12 @@ export interface components {
             fin?: string;
             codeEtape?: string | null;
             niveau?: string | null;
+            nbrInsEtp?: number | null;
+            cursusAmenage?: {
+                code: string;
+                libelle?: string | null;
+            } | null;
+            redoublant?: boolean;
         };
         "Inscription.jsonld-demande.out": components["schemas"]["HydraItemBaseSchema"] & {
             formation?: components["schemas"]["Formation.jsonld-demande.out"];
@@ -3914,6 +3920,12 @@ export interface components {
             fin?: string;
             codeEtape?: string | null;
             niveau?: string | null;
+            nbrInsEtp?: number | null;
+            cursusAmenage?: {
+                code: string;
+                libelle?: string | null;
+            } | null;
+            redoublant?: boolean;
         };
         "Inscription.jsonld-utilisateur.out": components["schemas"]["HydraItemBaseSchema"] & {
             formation?: components["schemas"]["Formation.jsonld-utilisateur.out"];
@@ -3923,6 +3935,12 @@ export interface components {
             fin?: string;
             codeEtape?: string | null;
             niveau?: string | null;
+            nbrInsEtp?: number | null;
+            cursusAmenage?: {
+                code: string;
+                libelle?: string | null;
+            } | null;
+            redoublant?: boolean;
         };
         "IntervenantBilanFinancier.customcsv": {
             uid?: string;

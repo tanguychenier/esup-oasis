@@ -16,12 +16,16 @@ select iae.cod_anu,
        rgi.lib_rgi,
        lib_dip,
        niveau,
-       dsi.lib_dsi
+       dsi.lib_dsi,
+       iae.nbr_ins_etp,
+       amg.cod_sis_cur_amg,
+       amg.lib_cur_amg
 from ins_adm_etp iae
          join diplome dip on dip.cod_dip = iae.cod_dip
          left outer join sec_dis_sis sds on sds.cod_sds = dip.cod_sds
          left outer join discipline_sis dsi on dsi.cod_dsi = sds.cod_dsi
          left outer join apogee.extern_niveau_etape niv on niv.cod_etp = iae.cod_etp
+         left outer join cursus_amg amg on amg.cod_cur_amg = iae.cod_cur_amg
          join individu i on i.cod_ind = iae.cod_ind
          join ins_adm_anu iaa on iaa.cod_ind = i.cod_ind and iaa.cod_anu = iae.cod_anu and iaa.eta_iaa = 'E'
          join regime_ins rgi on rgi.cod_rgi = iaa.cod_rgi
