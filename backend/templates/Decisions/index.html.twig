@@ -27,18 +27,24 @@
         header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin: -10px auto 14px auto;
+            align-items: flex-start;
+            margin: 0 auto 18px auto;
             width: 100%;
         }
 
         .expediteur {
-            width: 40%;
+            width: 45%;
         }
 
         .destinataire {
             width: 50%;
-            text-align: left;
+            text-align: right;
+        }
+
+        .destinataire b {
+            display: inline-block;
+            font-size: 12pt;
+            margin-bottom: 4px;
         }
 
         main {
@@ -65,14 +71,16 @@
         }
 
         .visa-block {
-            margin: 6px 0 10px 0;
+            margin: 14px 0 12px 0;
+            padding-top: 10px;
+            border-top: 1px solid #cccccc;
             font-size: 9pt;
-            line-height: 1.3em;
+            line-height: 1.35em;
             color: #444444;
         }
 
         .visa-block p {
-            margin: 0 0 3px 0;
+            margin: 0 0 4px 0;
             text-align: justify;
         }
 
@@ -112,17 +120,18 @@
         }
 
         .legal-mention {
-            margin-top: 10px;
-            padding-top: 6px;
+            margin-top: 24px;
+            padding-top: 8px;
             border-top: 1px solid #cccccc;
             font-size: 8.5pt;
-            line-height: 1.3em;
+            line-height: 1.35em;
             color: #555555;
             text-align: justify;
+            page-break-inside: avoid;
         }
 
         .legal-mention p {
-            margin: 0 0 3px 0;
+            margin: 0 0 4px 0;
         }
 
         footer {
@@ -153,7 +162,7 @@
 <div class="content">
     <header>
         <div class="expediteur">
-            <img src="{{ backUrl }}/images/logo_ub.svg" style="height: 95px" alt="logo"/>
+            <img src="data:image/svg+xml;base64,{{ data.logo_base64 }}" style="height: 95px" alt="logo"/>
             {% set premierAmenagement = data.amenagements|first %}
             {% set premierBeneficiaire = premierAmenagement.beneficiaires|first %}
             <div class="gestionnaire">

@@ -18,6 +18,7 @@ use App\Serializer\Encoder\Gotenberg\TempfileProcessor;
 use Exception;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
+use Sensiolabs\GotenbergBundle\Enumeration\PaperSize;
 use Sensiolabs\GotenbergBundle\GotenbergPdfInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
@@ -60,6 +61,8 @@ class PdfEncoder implements EncoderInterface
         if ($data[0] instanceof DecisionAmenagementExamens) {
             $data['triangle_base64'] = base64_encode(file_get_contents($this->projectRoot
             . '/public/images/triangle-ub.svg'));
+            $data['logo_base64'] = base64_encode(file_get_contents($this->projectRoot
+            . '/public/images/logo_ub.svg'));
         }
 
         if ($data[0] instanceof ServicesFaits) {
@@ -67,7 +70,9 @@ class PdfEncoder implements EncoderInterface
         }
 
         try {
-            $builder = $this->pdf->html()->processor(new TempfileProcessor());
+            $builder = $this->pdf->html()
+                ->processor(new TempfileProcessor())
+                ->paperStandardSize(PaperSize::A4);
             if (null !== $headerTemplate) {
                 $builder->header($headerTemplate, ['data' => $data]);
             }
@@ -80,7 +85,7 @@ class PdfEncoder implements EncoderInterface
         } catch (Exception $e) {
             $this->logger->error($e->getMessage());
             $this->logger->error($e->getTraceAsString());
-            throw new RuntimeException('Erreur à la génération du PDF');
+            throw new RuntimeException("Erreur PDF: " . $e->getMessage(), 0, $e);
         }
     }
 
