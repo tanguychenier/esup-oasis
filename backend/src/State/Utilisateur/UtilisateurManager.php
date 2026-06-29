@@ -572,7 +572,7 @@ readonly class UtilisateurManager
                 ->setFin($inscription['fin'])
                 ->setFormation($formation)
                 ->setCodeEtape($inscription['codeEtape'] ?? null)
-                ->setNbrInsEtp($inscription['nbrInsEtp'] ?? null)
+                ->setRedoublant($inscription['redoublant'] ?? null)
                 ->setCodeSisCurAmg($inscription['codeCursusAmenageSise'] ?? null)
                 ->setLibCurAmg($inscription['libelleCursusAmenage'] ?? null);
 

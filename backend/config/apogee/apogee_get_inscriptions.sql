@@ -17,7 +17,10 @@ select iae.cod_anu,
        lib_dip,
        niveau,
        dsi.lib_dsi,
-       iae.nbr_ins_etp,
+       case
+           when iae.nbr_ins_etp > 1 and amg.cod_sis_cur_amg is null then 1
+           else 0
+           end                               as redoublant,
        amg.cod_sis_cur_amg,
        amg.lib_cur_amg
 from ins_adm_etp iae

@@ -66,8 +66,9 @@ describe("ScolariteListItem — badges OBC-3", () => {
   it("affiche les deux badges quand redoublant ET cursus aménagé sont positionnés", () => {
     // Cas rare mais possible dans les données Apogée brutes : un redoublant
     // marqué côté SI alors qu'un cursus aménagé est également renseigné.
-    // Le backend exclut normalement ce cas via RedoublementCalculator, mais
-    // le front doit rester robuste si jamais l'API expose les deux.
+    // La requête SQL Apogée exclut normalement ce cas (cf.
+    // config/apogee/apogee_get_inscriptions.sql), mais le front doit
+    // rester robuste si jamais l'API expose les deux.
     render(
       <ScolariteListItem
         inscription={makeInscription({

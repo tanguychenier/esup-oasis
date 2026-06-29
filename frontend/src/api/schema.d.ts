@@ -3905,7 +3905,6 @@ export interface components {
             fin?: string;
             codeEtape?: string | null;
             niveau?: string | null;
-            nbrInsEtp?: number | null;
             cursusAmenage?: {
                 code: string;
                 libelle?: string | null;
@@ -3920,7 +3919,6 @@ export interface components {
             fin?: string;
             codeEtape?: string | null;
             niveau?: string | null;
-            nbrInsEtp?: number | null;
             cursusAmenage?: {
                 code: string;
                 libelle?: string | null;
@@ -3935,7 +3933,6 @@ export interface components {
             fin?: string;
             codeEtape?: string | null;
             niveau?: string | null;
-            nbrInsEtp?: number | null;
             cursusAmenage?: {
                 code: string;
                 libelle?: string | null;

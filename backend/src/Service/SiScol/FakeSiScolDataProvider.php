@@ -54,7 +54,7 @@ class FakeSiScolDataProvider extends AbstractSiScolDataProvider
                 'discipline' => 'Informatique',
                 'diplome' => 'Licence',
                 'codeEtape' => 'L1INFO',
-                'nbrInsEtp' => 1,
+                'redoublant' => false,
                 'codeCursusAmenageSise' => null,
                 'libelleCursusAmenage' => null,
             ],

@@ -50,12 +50,14 @@ class Inscription
     private ?string $codeEtape = null;
 
     /**
-     * Compteur Apogée NBR_INS_ETP : nombre d'inscriptions cumulées de
-     * l'étudiant à l'étape (cod_etp). Source officielle (mail DSI Fatiha
-     * 2026-06) pour qualifier le redoublement.
+     * Flag de redoublement dérivé par la requête SQL Apogée (cf.
+     * `config/apogee/apogee_get_inscriptions.sql`). La règle officielle
+     * DSI (mail Fatiha 2026-06) est calculée côté base — `nbr_ins_etp > 1`
+     * ET pas de `cod_sis_cur_amg` — pour que chaque université puisse
+     * adapter son propre SQL sans toucher au code applicatif.
      */
-    #[ORM\Column(type: Types::INTEGER, nullable: true)]
-    private ?int $nbrInsEtp = null;
+    #[ORM\Column(type: Types::BOOLEAN, nullable: true)]
+    private ?bool $redoublant = null;
 
     /**
      * Code SISE national du cursus aménagé (cod_sis_cur_amg). Renseigné
@@ -138,14 +140,14 @@ class Inscription
         return $this;
     }
 
-    public function getNbrInsEtp(): ?int
+    public function isRedoublant(): ?bool
     {
-        return $this->nbrInsEtp;
+        return $this->redoublant;
     }
 
-    public function setNbrInsEtp(?int $nbrInsEtp): self
+    public function setRedoublant(?bool $redoublant): self
     {
-        $this->nbrInsEtp = $nbrInsEtp;
+        $this->redoublant = $redoublant;
 
         return $this;
     }
