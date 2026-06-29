@@ -82,13 +82,19 @@ class ApogeeProvider extends AbstractSiScolDataProvider
                 'codeSituationSociale' => $codSoc,
                 'libelleSituationSociale' => isset($row->LIB_SOC) ? trim($row->LIB_SOC) : null,
                 'boursier' => $codSoc === 'BO',
-                'statut' => $row->LIB_RGI, //changement de dernière minute... on colle le régime dans le champ "statut"
+                // OBC-1 — régime d'inscription Apogée (rgi.lib_rgi), stocké dans `statut`
+                // pour des raisons historiques. Côté Utilisateur ce champ est porté par
+                // `statutEtudiant` (cf. PHPDoc sur l'entité) et exposé tel quel dans
+                // ScolariteSection sous le libellé "Régime d'inscription".
+                'statut' => $row->LIB_RGI,
                 'niveau' => $row->NIVEAU,
                 'discipline' => $row->LIB_DSI,
                 'diplome' => $row->LIB_DIP,
-                // OBC-1 — adresse postale annuelle uniquement (pas de fallback adresse fixe).
-                // Pour les adresses à l'étranger : la ville d'acheminement est portée par
-                // commune.lib_com (France) ou, à défaut, par adresse.lib_ade (étranger).
+                // OBC-1 — adresse postale Apogée : on prend l'adresse annuelle (de l'année
+                // d'inscription) et on retombe sur l'adresse fixe par champ quand l'annuelle
+                // est partielle (cf. critère JIRA Robin 29/06 : "adresse annuelle prioritaire ;
+                // adresse fixe sert de repli"). Pour la ville d'acheminement étranger,
+                // commune.lib_com (France) ou adresse.lib_ade (étranger).
                 'adresseLigne1' => isset($row->ADR_LIB_AD1) ? trim($row->ADR_LIB_AD1) : null,
                 'adresseLigne2' => isset($row->ADR_LIB_AD2) ? trim($row->ADR_LIB_AD2) : null,
                 'adresseComplement' => isset($row->ADR_LIB_AD3) ? trim($row->ADR_LIB_AD3) : null,

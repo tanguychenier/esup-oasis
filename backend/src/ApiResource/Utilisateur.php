@@ -604,6 +604,14 @@ final class Utilisateur
         }
     }
 
+    /**
+     * OBC-1 — Régime d'inscription Apogée (regime_ins.lib_rgi).
+     *
+     * Voir {@see \App\Entity\Utilisateur::$statutEtudiant} : malgré son nom historique,
+     * cette propriété porte le libellé du régime d'inscription Apogée (ex. "Formation
+     * initiale", "Formation continue", "Apprentissage") et est affichée par le frontend
+     * sous l'intitulé "Régime d'inscription".
+     */
     #[Groups([self::GROUP_OUT])]
     #[ApiProperty(
         security: "object == null or object.uid == user.getUserIdentifier() or is_granted('ROLE_PLANIFICATEUR')",

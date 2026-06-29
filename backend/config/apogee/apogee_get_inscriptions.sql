@@ -8,7 +8,9 @@ select iae.cod_anu,
        i.cod_sex_etu,
        case
            when annuelle.num_tel_port is not null then trim(annuelle.num_tel_port)
-           else trim(annuelle.num_tel)
+           when fixe.num_tel_port is not null then trim(fixe.num_tel_port)
+           when annuelle.num_tel is not null then trim(annuelle.num_tel)
+           else trim(fixe.num_tel)
            end                                                     as num_tel,
        iaa.cod_soc,
        soc.lib_soc,
@@ -16,13 +18,14 @@ select iae.cod_anu,
        lib_dip,
        niveau,
        dsi.lib_dsi,
-       trim(annuelle.lib_ad1)                                      as adr_lib_ad1,
-       trim(annuelle.lib_ad2)                                      as adr_lib_ad2,
-       trim(annuelle.lib_ad3)                                      as adr_lib_ad3,
-       trim(annuelle.cod_bdi)                                      as adr_cod_bdi,
-       trim(nvl(com.lib_com, annuelle.lib_ade))                    as adr_lib_vil,
-       trim(annuelle.cod_pay)                                      as adr_cod_pay,
-       trim(pay.lib_pay)                                           as adr_lib_pay
+       trim(coalesce(annuelle.lib_ad1, fixe.lib_ad1))               as adr_lib_ad1,
+       trim(coalesce(annuelle.lib_ad2, fixe.lib_ad2))               as adr_lib_ad2,
+       trim(coalesce(annuelle.lib_ad3, fixe.lib_ad3))               as adr_lib_ad3,
+       trim(coalesce(annuelle.cod_bdi, fixe.cod_bdi))               as adr_cod_bdi,
+       trim(coalesce(nvl(com_annuelle.lib_com, annuelle.lib_ade),
+                     nvl(com_fixe.lib_com, fixe.lib_ade)))          as adr_lib_vil,
+       trim(coalesce(annuelle.cod_pay, fixe.cod_pay))               as adr_cod_pay,
+       trim(coalesce(pay_annuelle.lib_pay, pay_fixe.lib_pay))       as adr_lib_pay
 from ins_adm_etp iae
          join diplome dip on dip.cod_dip = iae.cod_dip
          left outer join sec_dis_sis sds on sds.cod_sds = dip.cod_sds
@@ -35,8 +38,11 @@ from ins_adm_etp iae
          join composante cmp on cmp.cod_cmp = iae.cod_cmp
          join version_etape vet on vet.cod_etp = iae.cod_etp and vet.cod_vrs_vet = iae.cod_vrs_vet
          left outer join adresse annuelle on annuelle.cod_ind_ina = i.cod_ind and annuelle.cod_anu_ina = iae.cod_anu
-         left outer join commune com on com.cod_bdi = annuelle.cod_bdi and com.cod_com = annuelle.cod_com
-         left outer join pays pay on pay.cod_pay = annuelle.cod_pay
+         left outer join adresse fixe on fixe.cod_ind = i.cod_ind and fixe.cod_anu_ina is null
+         left outer join commune com_annuelle on com_annuelle.cod_bdi = annuelle.cod_bdi and com_annuelle.cod_com = annuelle.cod_com
+         left outer join commune com_fixe on com_fixe.cod_bdi = fixe.cod_bdi and com_fixe.cod_com = fixe.cod_com
+         left outer join pays pay_annuelle on pay_annuelle.cod_pay = annuelle.cod_pay
+         left outer join pays pay_fixe on pay_fixe.cod_pay = fixe.cod_pay
 where i.cod_etu = :codEtu
   and iae.cod_anu between :debut and :fin
   and iae.tem_iae_prm = 'O'

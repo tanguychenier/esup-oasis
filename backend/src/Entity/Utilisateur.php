@@ -237,6 +237,16 @@ class Utilisateur implements UserInterface
     #[Map(if: false)]
     private ?string $libelleSituationSociale = null;
 
+    /**
+     * OBC-1 — Régime d'inscription Apogée (regime_ins.lib_rgi).
+     *
+     * Historiquement nommé `statutEtudiant` mais porte en réalité le libellé du régime
+     * d'inscription remonté d'Apogée (ex. "Formation initiale", "Formation continue",
+     * "Apprentissage"). Côté frontend, ScolariteSection l'affiche sous le libellé
+     * "Régime d'inscription". Le nom de propriété est conservé pour compatibilité
+     * upstream ; un renommage en `regimeInscription` est envisageable lors d'un
+     * sprint dédié (cf. audit OBC-1 du 29/06/2026, à discuter avec Pierrick).
+     */
     #[ORM\Column(length: 255, nullable: true)]
     #[Map(if: false)]
     private ?string $statutEtudiant = null;
