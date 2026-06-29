@@ -17,6 +17,15 @@ select iae.cod_anu,
        lib_dip,
        niveau,
        dsi.lib_dsi,
+       -- OBC-3 — redoublant : compteur Apogée natif `nbr_ins_etp` (nombre total
+       -- d'inscriptions à l'étape, cumulatif sur la carrière de l'étudiant). Le
+       -- critère JIRA Robin 29/06/2026 mentionne "deux années consécutives" ;
+       -- `nbr_ins_etp > 1` est la règle stricte Apogée native, qui ne distingue
+       -- pas consécutif/non-consécutif. À reposer à Robin pour validation
+       -- explicite (un étudiant L1 en 2022 puis L1 en 2025 serait flaggé ici,
+       -- alors que la lecture stricte de "consécutif" l'exclurait).
+       -- Le cursus aménagé SISE (cod_sis_cur_amg) neutralise le badge (cf.
+       -- mail Robin 23/06/2026 : un cursus aménagé n'est pas un redoublement).
        case
            when iae.nbr_ins_etp > 1 and amg.cod_sis_cur_amg is null then 1
            else 0
