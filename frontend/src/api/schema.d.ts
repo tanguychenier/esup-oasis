@@ -3281,11 +3281,15 @@ export interface components {
         "DecisionAmenagementExamens-decision.in.jsonMergePatch": {
             etat?: string;
             observations?: string | null;
+            /** Format: date */
+            dateAvisMedecin?: string | null;
         };
         "DecisionAmenagementExamens.html-decision.out": {
             etat?: string;
             urlContenu?: string | null;
             observations?: string | null;
+            /** Format: date */
+            dateAvisMedecin?: string | null;
         };
         "DecisionAmenagementExamens.html-utilisateur.out": {
             etat?: string;
@@ -3294,6 +3298,8 @@ export interface components {
             etat?: string;
             urlContenu?: string | null;
             observations?: string | null;
+            /** Format: date */
+            dateAvisMedecin?: string | null;
         };
         "DecisionAmenagementExamens.jsonld-utilisateur.out": components["schemas"]["HydraItemBaseSchema"] & {
             etat?: string;
@@ -3302,6 +3308,8 @@ export interface components {
             etat?: string;
             urlContenu?: string | null;
             observations?: string | null;
+            /** Format: date */
+            dateAvisMedecin?: string | null;
         };
         "Demande-demande.in": {
             /**

@@ -5,13 +5,15 @@
  * For full copyright and license information please view the LICENSE file distributed with the source code.
  */
 
-import { App, Form, Input, Modal } from "antd";
+import { App, DatePicker, Form, Input, Modal } from "antd";
 import React, { useEffect } from "react";
+import dayjs, { Dayjs } from "dayjs";
 import { useApi } from "@context/api/ApiProvider";
 import { QK_BENEFICIAIRES, QK_UTILISATEURS_DECISIONS, QK_UTILISATEURS_ITEM } from "@api";
 
 type ObservationsForm = {
   observations: string | null;
+  dateAvisMedecin: Dayjs | null;
 };
 
 interface ModalDecisionObservationsProps {
@@ -22,11 +24,15 @@ interface ModalDecisionObservationsProps {
 }
 
 /**
- * Permet à un gestionnaire de saisir / modifier le champ libre
- * "Observations particulières" rattaché à une décision d'aménagement d'examens.
+ * Permet à un gestionnaire de saisir / modifier les informations libres rattachées à
+ * une décision d'aménagement d'examens :
+ *  - le champ texte "Observations particulières"
+ *  - la date de l'avis médical CDAPH (`dateAvisMedecin`), saisie au format DD/MM/YYYY
+ *    et envoyée à l'API au format ISO `YYYY-MM-DD`.
  *
- * Le champ est exposé via le DTO `DecisionAmenagementExamens` côté backend
- * (groupes `decision:in` et `decision:out`) et persisté en colonne TEXT.
+ * Les deux champs sont exposés via le DTO `DecisionAmenagementExamens` côté backend
+ * (groupes `decision:in` et `decision:out`) et persistés respectivement en colonne
+ * TEXT et DATE.
  */
 export function ModalDecisionObservations({
   open,
@@ -62,15 +68,21 @@ export function ModalDecisionObservations({
 
   useEffect(() => {
     if (open && decision) {
-      form.setFieldsValue({ observations: decision.observations ?? "" });
+      form.setFieldsValue({
+        observations: decision.observations ?? "",
+        dateAvisMedecin: decision.dateAvisMedecin ? dayjs(decision.dateAvisMedecin) : null,
+      });
     }
   }, [open, decision, form]);
 
   function handleSubmit(values: ObservationsForm) {
     const observations = values.observations?.trim() ? values.observations.trim() : null;
+    const dateAvisMedecin = values.dateAvisMedecin
+      ? values.dateAvisMedecin.format("YYYY-MM-DD")
+      : null;
     mutateDecision.mutate({
       "@id": decisionId,
-      data: { observations },
+      data: { observations, dateAvisMedecin },
     });
   }
 
@@ -89,7 +101,7 @@ export function ModalDecisionObservations({
         layout="vertical"
         form={form}
         onFinish={handleSubmit}
-        initialValues={{ observations: "" }}
+        initialValues={{ observations: "", dateAvisMedecin: null }}
       >
         <Form.Item
           name="observations"
@@ -102,6 +114,20 @@ export function ModalDecisionObservations({
             showCount
             disabled={isFetching}
             placeholder="Saisir les observations particulières liées à cette décision..."
+          />
+        </Form.Item>
+        <Form.Item
+          name="dateAvisMedecin"
+          label="Date de l'avis médical CDAPH"
+          extra="Date à laquelle le médecin désigné par la CDAPH a rendu son avis. Format DD/MM/YYYY."
+        >
+          <DatePicker
+            className="w-100"
+            picker="date"
+            format="DD/MM/YYYY"
+            allowClear
+            disabled={isFetching}
+            placeholder="JJ/MM/AAAA"
           />
         </Form.Item>
       </Form>

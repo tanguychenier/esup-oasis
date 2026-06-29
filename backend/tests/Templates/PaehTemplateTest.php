@@ -51,7 +51,7 @@ final class PaehTemplateTest extends TestCase
         self::assertStringContainsString("Aménagements d'examens", $html);
     }
 
-    public function testTemplatePluralizesAmenagementWordingFromTotalCount(): void
+    public function testTemplatePluralizesAmenagementSentenceFromTotalCount(): void
     {
         $multipleHtml = $this->renderWith(
             etudes: [$this->amenagement('A', pedagogique: true), $this->amenagement('B', pedagogique: true)],
@@ -64,8 +64,82 @@ final class PaehTemplateTest extends TestCase
             examens: [$this->amenagement('A', examens: true)],
         );
 
-        self::assertStringContainsString('des aménagements suivants', $multipleHtml);
-        self::assertStringContainsString("de l'aménagement suivant", $singleHtml);
+        // After the V4 refactor the "Je vous informe que j'ai pris la décision..." sentence is removed,
+        // but the closing paragraph still pluralises around the amendments count.
+        self::assertStringContainsString('Le bénéfice des aménagements', $multipleHtml);
+        self::assertStringContainsString("Le bénéfice de l'aménagement", $singleHtml);
+    }
+
+    public function testTemplateRendersTheNewVisaBlock(): void
+    {
+        $html = $this->renderWith(
+            etudes: [],
+            aidesHumaines: [],
+            examens: [$this->amenagement('Tiers-temps aux examens', examens: true)],
+        );
+
+        // The five "Vu..." references must be present, including the new V4 fifth one.
+        self::assertStringContainsString('<section class="visa-block">', $html);
+        self::assertStringContainsString('Vu le code de l\'éducation', $html);
+        self::assertStringContainsString('Vu la loi n° 2005-102 du 11 février 2005', $html);
+        self::assertStringContainsString('Vu la loi n° 2013-660 du 22 juillet 2013', $html);
+        self::assertStringContainsString(
+            "Vu la demande d'aménagements pour la poursuite des études au titre de l'année universitaire",
+            $html,
+        );
+        self::assertStringContainsString('Vu l\'avis du médecin', $html);
+    }
+
+    public function testTemplateRemovesOldIntroAndAnnouncementSentences(): void
+    {
+        $html = $this->renderWith(
+            etudes: [$this->amenagement('Tiers-temps en cours', pedagogique: true)],
+            aidesHumaines: [],
+            examens: [],
+        );
+
+        // The pre-V4 intro paragraph must not appear anymore.
+        self::assertStringNotContainsString('Vous avez sollicité', $html);
+        // The "Je vous informe que j'ai pris la décision..." sentence must be gone too.
+        self::assertStringNotContainsString("Je vous informe que j'ai pris la décision", $html);
+    }
+
+    public function testTemplateRendersDateAvisMedecinWhenProvided(): void
+    {
+        $html = $this->renderWith(
+            etudes: [],
+            aidesHumaines: [],
+            examens: [$this->amenagement('Tiers-temps aux examens', examens: true)],
+            dateAvisMedecin: new \DateTimeImmutable('2026-06-15'),
+        );
+
+        self::assertStringContainsString('15/06/2026', $html);
+        self::assertStringNotContainsString('________', $html);
+    }
+
+    public function testTemplateRendersPlaceholderWhenDateAvisMedecinIsNull(): void
+    {
+        $html = $this->renderWith(
+            etudes: [],
+            aidesHumaines: [],
+            examens: [$this->amenagement('Tiers-temps aux examens', examens: true)],
+            dateAvisMedecin: null,
+        );
+
+        self::assertStringContainsString('________', $html);
+    }
+
+    public function testTemplateRendersVersaillesAdministrativeCourtRecourseBlock(): void
+    {
+        $html = $this->renderWith(
+            etudes: [],
+            aidesHumaines: [],
+            examens: [$this->amenagement('Tiers-temps aux examens', examens: true)],
+        );
+
+        self::assertStringContainsString('Voies et délais de recours', $html);
+        self::assertStringContainsString('Tribunal administratif', $html);
+        self::assertStringContainsString('Versailles', $html);
     }
 
     public function testTemplateKeepsTheUpstreamDecisionEtablissementTitle(): void
@@ -152,6 +226,7 @@ final class PaehTemplateTest extends TestCase
         ?string $observations = null,
         ?\DateTimeInterface $dateNaissance = null,
         int|string|null $numeroEtudiant = null,
+        ?\DateTimeInterface $dateAvisMedecin = null,
     ): string {
         $etudiant = (new Utilisateur())
             ->setNom('DOE')
@@ -186,6 +261,7 @@ final class PaehTemplateTest extends TestCase
                 'examens' => $examens,
             ],
             'observations' => $observations,
+            'dateAvisMedecin' => $dateAvisMedecin,
             'annee' => 2026,
             'president' => ['qualite' => 'Le President', 'nom' => 'P. NOMME'],
             'responsable_phase' => [

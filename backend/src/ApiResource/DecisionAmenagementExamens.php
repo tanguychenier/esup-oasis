@@ -19,6 +19,7 @@ use ApiPlatform\Metadata\Patch;
 use App\State\DecisionAmenagementExamens\DecisionAmenagementExamensProcessor;
 use App\State\DecisionAmenagementExamens\DecisionAmenagementExamensProvider;
 use App\Validator\EtatDecisionValideConstraint;
+use DateTimeInterface;
 use ReflectionProperty;
 use Symfony\Component\ObjectMapper\Attribute\Map;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -115,6 +116,17 @@ class DecisionAmenagementExamens
                 $this->observations = $this->entity->getObservations();
             }
             return $this->observations ?? null;
+        }
+    }
+
+    #[Groups([self::GROUP_OUT, self::GROUP_IN])]
+    public ?DateTimeInterface $dateAvisMedecin {
+        get {
+            $prop = new ReflectionProperty(self::class, 'dateAvisMedecin');
+            if (!$prop->isInitialized($this) && $this->entity !== null) {
+                $this->dateAvisMedecin = $this->entity->getDateAvisMedecin();
+            }
+            return $this->dateAvisMedecin ?? null;
         }
     }
 

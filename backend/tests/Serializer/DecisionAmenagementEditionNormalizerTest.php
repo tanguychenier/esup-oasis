@@ -106,6 +106,81 @@ final class DecisionAmenagementEditionNormalizerTest extends TestCase
         self::assertNull($data['observations']);
     }
 
+    public function testNormalizeForwardsDateAvisMedecinToTwigPayload(): void
+    {
+        $beneficiaire = new Utilisateur();
+        $beneficiaire->setUid('benef-uid');
+
+        $dateAvisMedecin = new DateTimeImmutable('2026-06-15');
+
+        $entity = new DecisionAmenagementExamens();
+        $entity->setBeneficiaire($beneficiaire);
+        $entity->setDebut(new DateTimeImmutable('2026-09-01'));
+        $entity->setFin(new DateTimeImmutable('2027-08-31'));
+        $entity->setDateAvisMedecin($dateAvisMedecin);
+
+        $manager = $this->createStub(DecisionAmenagementManager::class);
+        $manager->method('parUidEtAnnee')->willReturn($entity);
+
+        $parametreRepository = $this->createStub(ParametreRepository::class);
+        $parametreRepository->method('findOneBy')->willReturnCallback(
+            fn(array $criteria) => $criteria['cle'] === \App\Entity\Parametre::SIGNATURE_DECISIONS
+                ? new \App\Entity\Parametre()
+                : null,
+        );
+
+        $normalizer = new DecisionAmenagementEditionNormalizer(
+            $manager,
+            $this->createStub(StorageProviderInterface::class),
+            $parametreRepository,
+        );
+        $normalizer->setClock(new MockClock(new DateTimeImmutable('2026-06-25 12:00:00')));
+
+        $resource = new DecisionAmenagementExamensResource($entity);
+
+        $data = $normalizer->normalize($resource, 'pdf');
+
+        self::assertArrayHasKey('dateAvisMedecin', $data);
+        self::assertInstanceOf(\DateTimeInterface::class, $data['dateAvisMedecin']);
+        self::assertSame('2026-06-15', $data['dateAvisMedecin']->format('Y-m-d'));
+    }
+
+    public function testNormalizeForwardsNullDateAvisMedecinWhenNotSet(): void
+    {
+        $beneficiaire = new Utilisateur();
+        $beneficiaire->setUid('benef-uid');
+
+        $entity = new DecisionAmenagementExamens();
+        $entity->setBeneficiaire($beneficiaire);
+        $entity->setDebut(new DateTimeImmutable('2026-09-01'));
+        $entity->setFin(new DateTimeImmutable('2027-08-31'));
+        // No dateAvisMedecin set -> remains null
+
+        $manager = $this->createStub(DecisionAmenagementManager::class);
+        $manager->method('parUidEtAnnee')->willReturn($entity);
+
+        $parametreRepository = $this->createStub(ParametreRepository::class);
+        $parametreRepository->method('findOneBy')->willReturnCallback(
+            fn(array $criteria) => $criteria['cle'] === \App\Entity\Parametre::SIGNATURE_DECISIONS
+                ? new \App\Entity\Parametre()
+                : null,
+        );
+
+        $normalizer = new DecisionAmenagementEditionNormalizer(
+            $manager,
+            $this->createStub(StorageProviderInterface::class),
+            $parametreRepository,
+        );
+        $normalizer->setClock(new MockClock(new DateTimeImmutable('2026-06-25 12:00:00')));
+
+        $resource = new DecisionAmenagementExamensResource($entity);
+
+        $data = $normalizer->normalize($resource, 'pdf');
+
+        self::assertArrayHasKey('dateAvisMedecin', $data);
+        self::assertNull($data['dateAvisMedecin']);
+    }
+
     public function testGroupByCategorieReturnsThreeBucketsEvenWhenEmpty(): void
     {
         $groupes = $this->normalizer->groupByCategorie([]);
