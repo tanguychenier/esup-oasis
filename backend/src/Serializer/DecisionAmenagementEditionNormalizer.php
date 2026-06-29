@@ -99,6 +99,12 @@ readonly class DecisionAmenagementEditionNormalizer implements NormalizerInterfa
         $data['responsable_phase']['signature']['contents'] = $file ?? null;
         $data['responsable_phase']['signature']['mimeType'] = $fichier?->getTypeMime();
 
+        // Maquettes uniquement : permet d'injecter une variante CSS pour le bloc Visa
+        // via le contexte de normalisation (clé 'visaVariant').
+        if (isset($context['visaVariant']) && is_string($context['visaVariant'])) {
+            $data['visaVariant'] = $context['visaVariant'];
+        }
+
         return $data;
     }
 

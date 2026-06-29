@@ -84,6 +84,18 @@
             text-align: justify;
         }
 
+        {% set visaVariant = data.visaVariant|default('A-sobre') %}
+        .visa-block .vu-marker { display: inline; }
+        {% if visaVariant == 'A-sobre' %}
+            .visa-block .vu-marker { font-weight: normal; font-style: normal; font-variant: normal; }
+        {% elseif visaVariant == 'B-italique' %}
+            .visa-block .vu-marker { font-style: italic; }
+        {% elseif visaVariant == 'C-smallcaps' %}
+            .visa-block .vu-marker { font-variant: small-caps; letter-spacing: 0.5px; }
+        {% elseif visaVariant == 'D-hanging-indent' %}
+            .visa-block p { padding-left: 2.2em; text-indent: -2.2em; }
+        {% endif %}
+
         .categorie-titre {
             font-size: 12pt;
             font-weight: bold;
@@ -194,15 +206,15 @@
 
     <main>
         <section class="visa-block">
-            <p>Vu le code de l'éducation, notamment ses articles D. 613-26 à D. 613-28&nbsp;;</p>
-            <p>Vu la loi n° 2005-102 du 11 février 2005 pour l'égalité des droits et des chances, la participation
+            <p><span class="vu-marker">Vu</span> le code de l'éducation, notamment ses articles D. 613-26 à D. 613-28&nbsp;;</p>
+            <p><span class="vu-marker">Vu</span> la loi n° 2005-102 du 11 février 2005 pour l'égalité des droits et des chances, la participation
                 et la citoyenneté des personnes handicapées&nbsp;;</p>
-            <p>Vu la loi n° 2013-660 du 22 juillet 2013 relative à l'enseignement supérieur et à la recherche&nbsp;;</p>
-            <p>Vu la demande d'aménagements pour la poursuite des études au titre de l'année universitaire
+            <p><span class="vu-marker">Vu</span> la loi n° 2013-660 du 22 juillet 2013 relative à l'enseignement supérieur et à la recherche&nbsp;;</p>
+            <p><span class="vu-marker">Vu</span> la demande d'aménagements pour la poursuite des études au titre de l'année universitaire
                 {{ data.annee }}-{{ data.annee + 1 }}, présentée par l'étudiant dans les conditions prévues aux
                 articles D. 613-26 à D. 613-28 du code de l'éducation auprès du médecin désigné par la commission
                 des droits et de l'autonomie des personnes handicapées&nbsp;;</p>
-            <p>Vu l'avis du médecin désigné par la commission des droits et de l'autonomie des personnes handicapées
+            <p><span class="vu-marker">Vu</span> l'avis du médecin désigné par la commission des droits et de l'autonomie des personnes handicapées
                 en date du
                 {% if data.dateAvisMedecin is defined and data.dateAvisMedecin is not null %}
                     {{ data.dateAvisMedecin|date('d/m/Y') }}
