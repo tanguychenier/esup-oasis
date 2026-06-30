@@ -49,6 +49,8 @@ class FakeSiScolDataProvider extends AbstractSiScolDataProvider
                 'debut' => new DateTime($debut->format('Y') . '-09-01'),
                 'fin' => new DateTime(((int) $debut->format('Y') + 1) . '-08-31'),
                 'boursier' => false,
+                'codeSituationSociale' => 'NO',
+                'libelleSituationSociale' => 'Normal',
                 'statut' => 'FI',
                 'niveau' => 'L1',
                 'discipline' => 'Informatique',

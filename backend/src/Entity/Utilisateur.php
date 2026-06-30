@@ -220,6 +220,15 @@ class Utilisateur implements UserInterface
     #[Map(if: false)]
     private ?bool $boursier = null;
 
+    // OBC-1 critère 2 — situation sociale Apogée (cod_soc / lib_soc).
+    #[ORM\Column(length: 10, nullable: true)]
+    #[Map(if: false)]
+    private ?string $codeSituationSociale = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Map(if: false)]
+    private ?string $libelleSituationSociale = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     #[Map(if: false)]
     private ?string $statutEtudiant = null;
@@ -1231,6 +1240,30 @@ class Utilisateur implements UserInterface
     public function setBoursier(?bool $boursier): static
     {
         $this->boursier = $boursier;
+
+        return $this;
+    }
+
+    public function getCodeSituationSociale(): ?string
+    {
+        return $this->codeSituationSociale;
+    }
+
+    public function setCodeSituationSociale(?string $codeSituationSociale): static
+    {
+        $this->codeSituationSociale = $codeSituationSociale;
+
+        return $this;
+    }
+
+    public function getLibelleSituationSociale(): ?string
+    {
+        return $this->libelleSituationSociale;
+    }
+
+    public function setLibelleSituationSociale(?string $libelleSituationSociale): static
+    {
+        $this->libelleSituationSociale = $libelleSituationSociale;
 
         return $this;
     }

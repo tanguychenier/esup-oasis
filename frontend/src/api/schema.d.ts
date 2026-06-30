@@ -5147,6 +5147,8 @@ export interface components {
             intervenantFin?: string | null;
             inscriptions?: components["schemas"]["Inscription.html-utilisateur.out"][];
             boursier?: boolean | null;
+            codeSituationSociale?: string | null;
+            libelleSituationSociale?: string | null;
             statutEtudiant?: string | null;
             adresse?: {
                 ligne1?: string | null;
@@ -5230,6 +5232,8 @@ export interface components {
             intervenantFin?: string | null;
             inscriptions?: components["schemas"]["Inscription.jsonld-utilisateur.out"][];
             boursier?: boolean | null;
+            codeSituationSociale?: string | null;
+            libelleSituationSociale?: string | null;
             statutEtudiant?: string | null;
             adresse?: {
                 "@id"?: string;

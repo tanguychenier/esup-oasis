@@ -523,7 +523,18 @@ readonly class UtilisateurManager
             usort($inscriptions, fn($a, $b) => $a['debut'] <=> $b['debut']);
 
             $last = array_key_last($inscriptions);
-            $utilisateur->setBoursier($inscriptions[$last]['boursier'] ?? false);
+
+            // OBC-1 critère 2 — situation sociale Apogée projetée depuis la dernière inscription.
+            $codeSituationSociale = $inscriptions[$last]['codeSituationSociale'] ?? null;
+            $utilisateur->setCodeSituationSociale($codeSituationSociale);
+            $utilisateur->setLibelleSituationSociale($inscriptions[$last]['libelleSituationSociale'] ?? null);
+
+            // Le booléen boursier reste alimenté pour rétrocompat : soit le témoin Apogée legacy,
+            // soit le code situation sociale "BO".
+            // TODO(apogée-réel) : confirmer que "BO" est bien le seul code boursier sur l'instance réelle.
+            $utilisateur->setBoursier(
+                ($inscriptions[$last]['boursier'] ?? false) || ($codeSituationSociale === 'BO'),
+            );
             $utilisateur->setStatutEtudiant($inscriptions[$last]['statut'] ?? '');
 
             // OBC-1 — projection de l'adresse Apogée la plus récente vers Utilisateur::adresse.

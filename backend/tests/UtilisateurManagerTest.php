@@ -37,6 +37,29 @@ class UtilisateurManagerTest extends ApiTestCaseCustom
         $this->assertContains('admin', $uids);
     }
 
+    public function testMajInscriptionsProjetteSituationSociale(): void
+    {
+        // OBC-1 critère 2 — la projection situation sociale est alimentée par le
+        // SiScolDataProvider. En env de test, AbstractSiScolDataProvider est aliasé
+        // sur FakeSiScolDataProvider qui renvoie codeSituationSociale "NO"/"Normal"
+        // et boursier=false. On valide que la projection recopie ces champs.
+        $container = static::getContainer();
+        $em = $container->get('doctrine')->getManager();
+        // 'demandeur' porte un numeroEtudiant (123456), donc la MAJ scol se déclenche.
+        $user = $em->getRepository(Utilisateur::class)->findOneBy(['uid' => 'demandeur']);
+
+        /** @var UtilisateurManager $manager */
+        $manager = $container->get(UtilisateurManager::class);
+
+        $debut = new \DateTime('2024-09-01');
+        $fin = new \DateTime('2025-08-31');
+        $manager->majInscriptionsEtIdentite($user, $debut, $fin);
+
+        $this->assertSame('NO', $user->getCodeSituationSociale());
+        $this->assertSame('Normal', $user->getLibelleSituationSociale());
+        $this->assertFalse($user->isBoursier(), 'Le code NO ne doit pas dériver boursier');
+    }
+
     public function testCreerBeneficiairePourDemande(): void
     {
         $container = static::getContainer();
