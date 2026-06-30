@@ -571,7 +571,10 @@ readonly class UtilisateurManager
             $new->setDebut($inscription['debut'])
                 ->setFin($inscription['fin'])
                 ->setFormation($formation)
-                ->setCodeEtape($inscription['codeEtape'] ?? null);
+                ->setCodeEtape($inscription['codeEtape'] ?? null)
+                ->setNombreInscriptionsEtape($inscription['nombreInscriptionsEtape'] ?? null)
+                ->setCodeCursusAmenage($inscription['codeCursusAmenage'] ?? null)
+                ->setLibelleCursusAmenage($inscription['libelleCursusAmenage'] ?? null);
 
             $utilisateur->addInscription($new);
         }

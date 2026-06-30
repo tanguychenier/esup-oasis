@@ -122,6 +122,56 @@ final class Inscription
         }
     }
 
+    /**
+     * OBC-3 — code du cursus aménagé SISE (cod_sis_cur_amg). null hors
+     * cursus aménagé.
+     */
+    #[Groups([Utilisateur::GROUP_OUT, Demande::GROUP_OUT, Utilisateur::AMENAGEMENTS_UTILISATEURS_OUT])]
+    public ?string $codeCursusAmenage {
+        get {
+            $prop = new ReflectionProperty(self::class, 'codeCursusAmenage');
+            if (!$prop->isInitialized($this) && $this->entity !== null) {
+                $this->codeCursusAmenage = $this->entity->getCodeCursusAmenage();
+            }
+            return $this->codeCursusAmenage ?? null;
+        }
+    }
+
+    /**
+     * OBC-3 — libellé du cursus aménagé (lib_cur_amg), affiché tel quel
+     * sur la fiche bénéficiaire. null hors cursus aménagé.
+     */
+    #[Groups([Utilisateur::GROUP_OUT, Demande::GROUP_OUT, Utilisateur::AMENAGEMENTS_UTILISATEURS_OUT])]
+    public ?string $libelleCursusAmenage {
+        get {
+            $prop = new ReflectionProperty(self::class, 'libelleCursusAmenage');
+            if (!$prop->isInitialized($this) && $this->entity !== null) {
+                $this->libelleCursusAmenage = $this->entity->getLibelleCursusAmenage();
+            }
+            return $this->libelleCursusAmenage ?? null;
+        }
+    }
+
+    /**
+     * OBC-3 — redoublement dérivé à la volée du compteur natif Apogée
+     * (nbr_ins_etp) via RedoublementCalculator (règle officielle Robin
+     * Kaczala 23/06/2026 : > 1 ⇒ redoublant), avec garde cursus aménagé.
+     * Jamais persisté.
+     */
+    #[Groups([Utilisateur::GROUP_OUT, Demande::GROUP_OUT, Utilisateur::AMENAGEMENTS_UTILISATEURS_OUT])]
+    public bool $redoublant {
+        get {
+            $prop = new ReflectionProperty(self::class, 'redoublant');
+            if (!$prop->isInitialized($this) && $this->entity !== null) {
+                $this->redoublant = (new \App\Service\SiScol\RedoublementCalculator())->estRedoublant(
+                    $this->entity->getNombreInscriptionsEtape(),
+                    $this->entity->getCodeCursusAmenage(),
+                );
+            }
+            return $this->redoublant ?? false;
+        }
+    }
+
     public function __construct(
         private readonly ?\App\Entity\Inscription $entity = null,
     ) {}

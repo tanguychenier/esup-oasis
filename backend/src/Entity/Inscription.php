@@ -49,6 +49,29 @@ class Inscription
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $codeEtape = null;
 
+    /**
+     * OBC-3 — compteur natif Apogée (nbr_ins_etp) du nombre
+     * d'inscriptions administratives à l'étape. Base officielle du
+     * calcul du redoublement (cf. RedoublementCalculator).
+     */
+    #[ORM\Column(nullable: true)]
+    private ?int $nombreInscriptionsEtape = null;
+
+    /**
+     * OBC-3 — code du cursus aménagé SISE (cod_sis_cur_amg). Sa présence
+     * neutralise le calcul du redoublement (étalement / contrat
+     * pédagogique pluri-annuel) et alimente l'affichage "cursus aménagé".
+     */
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $codeCursusAmenage = null;
+
+    /**
+     * OBC-3 — libellé du cursus aménagé (lib_cur_amg), affiché tel quel
+     * sur la fiche bénéficiaire.
+     */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $libelleCursusAmenage = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -110,6 +133,42 @@ class Inscription
     public function setCodeEtape(?string $codeEtape): self
     {
         $this->codeEtape = $codeEtape;
+
+        return $this;
+    }
+
+    public function getNombreInscriptionsEtape(): ?int
+    {
+        return $this->nombreInscriptionsEtape;
+    }
+
+    public function setNombreInscriptionsEtape(?int $nombreInscriptionsEtape): self
+    {
+        $this->nombreInscriptionsEtape = $nombreInscriptionsEtape;
+
+        return $this;
+    }
+
+    public function getCodeCursusAmenage(): ?string
+    {
+        return $this->codeCursusAmenage;
+    }
+
+    public function setCodeCursusAmenage(?string $codeCursusAmenage): self
+    {
+        $this->codeCursusAmenage = $codeCursusAmenage;
+
+        return $this;
+    }
+
+    public function getLibelleCursusAmenage(): ?string
+    {
+        return $this->libelleCursusAmenage;
+    }
+
+    public function setLibelleCursusAmenage(?string $libelleCursusAmenage): self
+    {
+        $this->libelleCursusAmenage = $libelleCursusAmenage;
 
         return $this;
     }

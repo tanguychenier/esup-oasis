@@ -16,7 +16,10 @@ select iae.cod_anu,
        rgi.lib_rgi,
        lib_dip,
        niveau,
-       dsi.lib_dsi
+       dsi.lib_dsi,
+       iae.nbr_ins_etp,
+       amg.cod_sis_cur_amg,
+       amg.lib_cur_amg
 from ins_adm_etp iae
          join diplome dip on dip.cod_dip = iae.cod_dip
          left outer join sec_dis_sis sds on sds.cod_sds = dip.cod_sds
@@ -27,6 +30,7 @@ from ins_adm_etp iae
          join regime_ins rgi on rgi.cod_rgi = iaa.cod_rgi
          join composante cmp on cmp.cod_cmp = iae.cod_cmp
          join version_etape vet on vet.cod_etp = iae.cod_etp and vet.cod_vrs_vet = iae.cod_vrs_vet
+         left outer join cursus_amg amg on (amg.cod_cur_amg = iae.cod_cur_amg)
          left outer join adresse fixe on fixe.cod_ind = i.cod_ind
          left outer join adresse annuelle on annuelle.cod_ind_ina = i.cod_ind and annuelle.cod_anu_ina = iae.cod_anu
 where i.cod_etu = :codEtu

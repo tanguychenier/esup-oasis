@@ -84,6 +84,18 @@ class ApogeeProvider extends AbstractSiScolDataProvider
                 // OBC-3 — code étape (cod_etp) pour exposer le cursus
                 // d'inscription et en dériver le niveau LMD côté API.
                 'codeEtape' => isset($row->COD_ETP) ? trim($row->COD_ETP) : null,
+                // OBC-3 — compteur natif (nbr_ins_etp) du nombre
+                // d'inscriptions à l'étape, base du calcul redoublement.
+                // TODO(apogée-réel): confirmer la sémantique exacte de
+                // nbr_ins_etp avec la DSI (incrémenté aussi sur
+                // changement d'accréditation/régime, cf. limite documentée
+                // dans RedoublementCalculator).
+                'nombreInscriptionsEtape' => isset($row->NBR_INS_ETP) ? (int) $row->NBR_INS_ETP : null,
+                // OBC-3 — cursus aménagé SISE (cod_sis_cur_amg / lib_cur_amg).
+                // TODO(apogée-réel): confirmer le rattachement
+                // cod_cur_amg sur ins_adm_etp et la table cursus_amg.
+                'codeCursusAmenage' => isset($row->COD_SIS_CUR_AMG) ? trim($row->COD_SIS_CUR_AMG) : null,
+                'libelleCursusAmenage' => isset($row->LIB_CUR_AMG) ? trim($row->LIB_CUR_AMG) : null,
             ];
         }
 

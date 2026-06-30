@@ -68,6 +68,18 @@ export function ScolariteListItem({
                   {inscription.niveau}
                 </Tag>
               )}
+              {inscription.redoublant && (
+                <Tag color="orange" style={{ marginLeft: 8 }}>
+                  Redoublant
+                </Tag>
+              )}
+              {inscription.codeCursusAmenage && (
+                <Tooltip title={inscription.libelleCursusAmenage ?? inscription.codeCursusAmenage}>
+                  <Tag color="purple" style={{ marginLeft: 8 }}>
+                    Cursus aménagé
+                  </Tag>
+                </Tooltip>
+              )}
             </div>
             <ComposanteItem composanteId={inscription.formation?.composante} />
             {inscription.codeEtape && (
