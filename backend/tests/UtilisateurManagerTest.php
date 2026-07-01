@@ -4,6 +4,7 @@ namespace App\Tests;
 
 use App\Entity\Utilisateur;
 use App\Service\LdapService;
+use App\Service\SiScol\FakeSiScolDataProvider;
 use App\State\Utilisateur\UtilisateurManager;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -58,6 +59,57 @@ class UtilisateurManagerTest extends ApiTestCaseCustom
         $this->assertSame('NO', $user->getCodeSituationSociale());
         $this->assertSame('Normal', $user->getLibelleSituationSociale());
         $this->assertFalse($user->isBoursier(), 'Le code NO ne doit pas dériver boursier');
+    }
+
+    public function testMajInscriptionsCodeBoDeriveBoursier(): void
+    {
+        // OBC-1 critère 2 — coeur de la règle : un code situation sociale "BO"
+        // doit dériver boursier = true, MÊME si le témoin Apogée legacy est faux.
+        // On exerce ici le VRAI UtilisateurManager (pas une réplique) via le
+        // FakeSiScolDataProvider configuré pour renvoyer "BO".
+        FakeSiScolDataProvider::$boursier = false;
+        FakeSiScolDataProvider::$codeSituationSociale = 'BO';
+        FakeSiScolDataProvider::$libelleSituationSociale = 'Boursier';
+
+        $container = static::getContainer();
+        $em = $container->get('doctrine')->getManager();
+        $user = $em->getRepository(Utilisateur::class)->findOneBy(['uid' => 'demandeur']);
+
+        /** @var UtilisateurManager $manager */
+        $manager = $container->get(UtilisateurManager::class);
+        $manager->majInscriptionsEtIdentite($user, new \DateTime('2024-09-01'), new \DateTime('2025-08-31'));
+
+        $this->assertSame('BO', $user->getCodeSituationSociale());
+        $this->assertSame('Boursier', $user->getLibelleSituationSociale());
+        $this->assertTrue($user->isBoursier(), 'Le code BO doit dériver boursier = true');
+    }
+
+    public function testMajInscriptionsTemoinLegacyResteBoursier(): void
+    {
+        // Rétrocompat : le témoin boursier legacy d'Apogée reste honoré même quand
+        // le code situation sociale n'est pas "BO".
+        FakeSiScolDataProvider::$boursier = true;
+        FakeSiScolDataProvider::$codeSituationSociale = 'NO';
+        FakeSiScolDataProvider::$libelleSituationSociale = 'Normal';
+
+        $container = static::getContainer();
+        $em = $container->get('doctrine')->getManager();
+        $user = $em->getRepository(Utilisateur::class)->findOneBy(['uid' => 'demandeur']);
+
+        /** @var UtilisateurManager $manager */
+        $manager = $container->get(UtilisateurManager::class);
+        $manager->majInscriptionsEtIdentite($user, new \DateTime('2024-09-01'), new \DateTime('2025-08-31'));
+
+        $this->assertTrue($user->isBoursier(), 'Le témoin legacy boursier doit rester honoré');
+    }
+
+    protected function tearDown(): void
+    {
+        // Réinitialise le mock situation sociale pour ne pas polluer les autres tests.
+        FakeSiScolDataProvider::$boursier = false;
+        FakeSiScolDataProvider::$codeSituationSociale = 'NO';
+        FakeSiScolDataProvider::$libelleSituationSociale = 'Normal';
+        parent::tearDown();
     }
 
     public function testCreerBeneficiairePourDemande(): void

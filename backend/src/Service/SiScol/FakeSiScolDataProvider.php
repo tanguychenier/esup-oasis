@@ -20,6 +20,16 @@ use DateTimeInterface;
 class FakeSiScolDataProvider extends AbstractSiScolDataProvider
 {
     /**
+     * Situation sociale simulée renvoyée par le mock, surchargeable depuis les
+     * tests pour exercer les différentes branches de la projection réelle
+     * (UtilisateurManager) sans dépendre d'Apogée. Valeurs par défaut : étudiant
+     * non boursier ("NO"/"Normal").
+     */
+    public static bool $boursier = false;
+    public static ?string $codeSituationSociale = 'NO';
+    public static ?string $libelleSituationSociale = 'Normal';
+
+    /**
      * @inheritDoc
      */
     public function getInscriptions(Utilisateur $etudiant, DateTimeInterface $debut, ?DateTimeInterface $fin): array
@@ -48,9 +58,9 @@ class FakeSiScolDataProvider extends AbstractSiScolDataProvider
                 'libComposante' => 'Composante de test',
                 'debut' => new DateTime($debut->format('Y') . '-09-01'),
                 'fin' => new DateTime(((int) $debut->format('Y') + 1) . '-08-31'),
-                'boursier' => false,
-                'codeSituationSociale' => 'NO',
-                'libelleSituationSociale' => 'Normal',
+                'boursier' => self::$boursier,
+                'codeSituationSociale' => self::$codeSituationSociale,
+                'libelleSituationSociale' => self::$libelleSituationSociale,
                 'statut' => 'FI',
                 'niveau' => 'L1',
                 'discipline' => 'Informatique',
