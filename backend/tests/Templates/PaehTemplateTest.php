@@ -78,16 +78,41 @@ final class PaehTemplateTest extends TestCase
             examens: [$this->amenagement('Tiers-temps aux examens', examens: true)],
         );
 
-        // The five "Vu..." references must be present, including the new V4 fifth one.
+        // Visa V9 (retours Ilona 2026-07-01) : les lignes "code de l'éducation" et
+        // "demande d'aménagements" ont été fusionnées en une seule référence aux
+        // articles D. 613-26 à D. 613-28, placée en 3e position.
         self::assertStringContainsString('<section class="visa-block">', $html);
-        self::assertStringContainsString('Vu le code de l\'éducation', $html);
         self::assertStringContainsString('Vu la loi n° 2005-102 du 11 février 2005', $html);
         self::assertStringContainsString('Vu la loi n° 2013-660 du 22 juillet 2013', $html);
         self::assertStringContainsString(
+            'Vu les articles D. 613-26 à D. 613-28 du code de l\'éducation relatifs aux aménagements',
+            $html,
+        );
+        self::assertStringContainsString('Vu le décret n° 2013-756 du 19 août 2013', $html);
+        self::assertStringContainsString('Vu la circulaire du 6 février 2023', $html);
+        self::assertStringContainsString('Vu la circulaire du 10 juillet 2024', $html);
+        self::assertStringContainsString('Vu l\'avis du médecin', $html);
+        // La ligne narrative fusionnée ne doit plus apparaître telle quelle.
+        self::assertStringNotContainsString(
             "Vu la demande d'aménagements pour la poursuite des études au titre de l'année universitaire",
             $html,
         );
-        self::assertStringContainsString('Vu l\'avis du médecin', $html);
+    }
+
+    public function testTemplateRendersTheTitle(): void
+    {
+        $html = $this->renderWith(
+            etudes: [$this->amenagement('Tiers-temps en cours', pedagogique: true)],
+            aidesHumaines: [],
+            examens: [],
+        );
+
+        // Titre demandé par Ilona (2026-07-01), placé sous le logo.
+        self::assertStringContainsString('class="paeh-titre"', $html);
+        self::assertStringContainsString(
+            "Notification de Plan d'accompagnement de l'étudiant en situation de handicap (PAEH)",
+            $html,
+        );
     }
 
     public function testTemplateRemovesOldIntroAndAnnouncementSentences(): void

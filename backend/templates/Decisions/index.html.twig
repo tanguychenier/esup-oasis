@@ -24,6 +24,15 @@
             margin: auto;
         }
 
+        .paeh-titre {
+            text-align: center;
+            font-size: 13pt;
+            font-weight: bold;
+            color: #222222;
+            margin: 6px auto 10px auto;
+            line-height: 1.3em;
+        }
+
         .paeh-header {
             width: 100%;
             font-size: 9.5pt;
@@ -114,16 +123,14 @@
         }
 
         .visa-block {
-            margin: 18px 0 16px 0;
-            padding-top: 18px;
-            border-top: 1px solid #cccccc;
-            font-size: 9pt;
-            line-height: 1.3em;
+            margin: 8px 0 14px 0;
+            font-size: 8pt;
+            line-height: 1.25em;
             color: #333333;
         }
 
         .visa-block p {
-            margin: 0 0 5px 0;
+            margin: 0 0 4px 0;
             text-align: justify;
         }
 
@@ -224,13 +231,6 @@
     {% set formationActive = inscriptionActive is not null ? inscriptionActive.formation : null %}
     {% set composanteActive = formationActive is not null and formationActive.composante is defined ? formationActive.composante : null %}
 
-    <div class="paeh-header">
-        <span class="annee">Année universitaire {{ data.annee }}-{{ data.annee + 1 }}</span>
-        {% if composanteActive is not null %}
-            <span class="composante">{{ composanteActive.libelle|default(composanteActive) }}</span>
-        {% endif %}
-    </div>
-
     <header>
         <div class="expediteur">
             <img src="data:image/svg+xml;base64,{{ data.logo_base64 }}" style="height: 70px" alt="logo"/>
@@ -268,16 +268,22 @@
         </div>
     </header>
 
+    <h1 class="paeh-titre">Notification de Plan d'accompagnement de l'étudiant en situation de handicap (PAEH)</h1>
+
     <main>
+        <div class="paeh-header">
+            <span class="annee">Année universitaire {{ data.annee }}-{{ data.annee + 1 }}</span>
+            {% if composanteActive is not null %}
+                <span class="composante">{{ composanteActive.libelle|default(composanteActive) }}</span>
+            {% endif %}
+        </div>
+
         <section class="visa-block">
-            <p>Vu le code de l'éducation, notamment ses articles D. 613-26 à D. 613-28&nbsp;;</p>
             <p>Vu la loi n° 2005-102 du 11 février 2005 pour l'égalité des droits et des chances,
                 la participation et la citoyenneté des personnes handicapées&nbsp;;</p>
             <p>Vu la loi n° 2013-660 du 22 juillet 2013 relative à l'enseignement supérieur et à la recherche&nbsp;;</p>
-            <p>Vu la demande d'aménagements pour la poursuite des études au titre de l'année universitaire
-                {{ data.annee }}-{{ data.annee + 1 }}, présentée par l'étudiant dans les conditions prévues aux
-                articles D. 613-26 à D. 613-28 du code de l'éducation auprès du médecin désigné par la commission
-                des droits et de l'autonomie des personnes handicapées&nbsp;;</p>
+            <p>Vu les articles D. 613-26 à D. 613-28 du code de l'éducation relatifs aux aménagements des conditions
+                de déroulement des études et des examens des étudiants en situation de handicap&nbsp;;</p>
             <p>Vu le décret n° 2013-756 du 19 août 2013 relatif aux dispositions réglementaires des livres VI et VII
                 du code de l'éducation (Décrets en Conseil d'État et Décrets)&nbsp;;</p>
             <p>Vu la circulaire du 6 février 2023, BO N°10 du 9 mars 2023, relative à l'organisation des examens et
