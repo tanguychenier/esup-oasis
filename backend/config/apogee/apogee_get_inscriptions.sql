@@ -13,10 +13,20 @@ select iae.cod_anu,
            else trim(fixe.num_tel)
            end                               as num_tel,
        iaa.tem_brs_iaa,
+       iaa.cod_soc,
+       soc.lib_soc,
        rgi.lib_rgi,
        lib_dip,
        niveau,
-       dsi.lib_dsi
+       dsi.lib_dsi,
+       -- adresse choisie en bloc (annuelle si elle existe, sinon fixe) : un coalesce
+       -- colonne par colonne mélangerait les deux adresses quand l'annuelle est partielle
+       case when annuelle.cod_ind_ina is not null then annuelle.lib_ad1 else fixe.lib_ad1 end as adr_lib_ad1,
+       case when annuelle.cod_ind_ina is not null then annuelle.lib_ad2 else fixe.lib_ad2 end as adr_lib_ad2,
+       case when annuelle.cod_ind_ina is not null then annuelle.lib_ad3 else fixe.lib_ad3 end as adr_lib_ad3,
+       case when annuelle.cod_ind_ina is not null then annuelle.cod_bdi else fixe.cod_bdi end as adr_cod_bdi,
+       case when annuelle.cod_ind_ina is not null then annuelle.lib_vil else fixe.lib_vil end as adr_lib_vil,
+       case when annuelle.cod_ind_ina is not null then annuelle.cod_pay else fixe.cod_pay end as adr_cod_pay
 from ins_adm_etp iae
          join diplome dip on dip.cod_dip = iae.cod_dip
          left outer join sec_dis_sis sds on sds.cod_sds = dip.cod_sds
@@ -25,6 +35,7 @@ from ins_adm_etp iae
          join individu i on i.cod_ind = iae.cod_ind
          join ins_adm_anu iaa on iaa.cod_ind = i.cod_ind and iaa.cod_anu = iae.cod_anu and iaa.eta_iaa = 'E'
          join regime_ins rgi on rgi.cod_rgi = iaa.cod_rgi
+         left outer join sit_sociale soc ON (soc.cod_soc = iaa.cod_soc)
          join composante cmp on cmp.cod_cmp = iae.cod_cmp
          join version_etape vet on vet.cod_etp = iae.cod_etp and vet.cod_vrs_vet = iae.cod_vrs_vet
          left outer join adresse fixe on fixe.cod_ind = i.cod_ind

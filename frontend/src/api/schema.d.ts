@@ -5159,7 +5159,18 @@ export interface components {
             intervenantFin?: string | null;
             inscriptions?: components["schemas"]["Inscription.html-utilisateur.out"][];
             boursier?: boolean | null;
+            codeSituationSociale?: string | null;
+            libelleSituationSociale?: string | null;
             statutEtudiant?: string | null;
+            adresse?: {
+                ligne1?: string | null;
+                ligne2?: string | null;
+                codePostal?: string | null;
+                ville?: string | null;
+                pays?: string | null;
+            } | null;
+            /** "EN_COURS" if at least one registration covers today, "TERMINEE" otherwise. */
+            statutInscriptionAdministrative?: string | null;
             abonneImmediat?: boolean;
             abonneVeille?: boolean;
             abonneAvantVeille?: boolean;
@@ -5233,7 +5244,20 @@ export interface components {
             intervenantFin?: string | null;
             inscriptions?: components["schemas"]["Inscription.jsonld-utilisateur.out"][];
             boursier?: boolean | null;
+            codeSituationSociale?: string | null;
+            libelleSituationSociale?: string | null;
             statutEtudiant?: string | null;
+            adresse?: {
+                "@id"?: string;
+                "@type"?: string;
+                ligne1?: string | null;
+                ligne2?: string | null;
+                codePostal?: string | null;
+                ville?: string | null;
+                pays?: string | null;
+            } | null;
+            /** "EN_COURS" if at least one registration covers today, "TERMINEE" otherwise. */
+            statutInscriptionAdministrative?: string | null;
             abonneImmediat?: boolean;
             abonneVeille?: boolean;
             abonneAvantVeille?: boolean;

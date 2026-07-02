@@ -77,10 +77,22 @@ class ApogeeProvider extends AbstractSiScolDataProvider
                 'debut' => new DateTime($row->COD_ANU . '-09-01'),
                 'fin' => new DateTime(($row->COD_ANU + 1) . '-08-31'),
                 'boursier' => $row->TEM_BRS_IAA == 'O',
+                // OBC-1 critère 2 — situation sociale Apogée (oci renvoie les colonnes en MAJUSCULES).
+                // TODO(apogée-réel) : confirmer le nom exact de colonne cod_soc (vs cod_sco) et les
+                // valeurs réelles du code non-boursier sur l'instance Apogée Saclay.
+                'codeSituationSociale' => isset($row->COD_SOC) ? trim($row->COD_SOC) : null,
+                'libelleSituationSociale' => isset($row->LIB_SOC) ? trim($row->LIB_SOC) : null,
                 'statut' => $row->LIB_RGI, //changement de dernière minute... on colle le régime dans le champ "statut"
                 'niveau' => $row->NIVEAU,
                 'discipline' => $row->LIB_DSI,
                 'diplome' => $row->LIB_DIP,
+                // OBC-1 — adresse postale (annuelle puis fixe en fallback)
+                'adresseLigne1' => isset($row->ADR_LIB_AD1) ? trim($row->ADR_LIB_AD1) : null,
+                'adresseLigne2' => isset($row->ADR_LIB_AD2) ? trim($row->ADR_LIB_AD2) : null,
+                'adresseComplement' => isset($row->ADR_LIB_AD3) ? trim($row->ADR_LIB_AD3) : null,
+                'adresseCodePostal' => isset($row->ADR_COD_BDI) ? trim($row->ADR_COD_BDI) : null,
+                'adresseVille' => isset($row->ADR_LIB_VIL) ? trim($row->ADR_LIB_VIL) : null,
+                'adressePays' => isset($row->ADR_COD_PAY) ? trim($row->ADR_COD_PAY) : null,
             ];
         }
 
