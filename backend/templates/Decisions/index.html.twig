@@ -24,12 +24,16 @@
             margin: auto;
         }
 
+        .logo-bloc {
+            margin: 0 0 6px 0;
+        }
+
         .paeh-titre {
             text-align: center;
             font-size: 13pt;
             font-weight: bold;
             color: #222222;
-            margin: 6px auto 10px auto;
+            margin: 0 auto 12px auto;
             line-height: 1.3em;
         }
 
@@ -105,9 +109,8 @@
         }
 
         .gestionnaire {
-            padding-left: 2%;
-            font-size: 9pt;
-            line-height: 1.2em;
+            font-size: 9.5pt;
+            line-height: 1.3em;
         }
 
         .exergue {
@@ -231,9 +234,14 @@
     {% set formationActive = inscriptionActive is not null ? inscriptionActive.formation : null %}
     {% set composanteActive = formationActive is not null and formationActive.composante is defined ? formationActive.composante : null %}
 
+    <div class="logo-bloc">
+        <img src="data:image/svg+xml;base64,{{ data.logo_base64 }}" style="height: 70px" alt="logo"/>
+    </div>
+
+    <h1 class="paeh-titre">Notification de Plan d'accompagnement de l'étudiant en situation de handicap (PAEH)</h1>
+
     <header>
         <div class="expediteur">
-            <img src="data:image/svg+xml;base64,{{ data.logo_base64 }}" style="height: 70px" alt="logo"/>
             <div class="gestionnaire">
                 Université de Bordeaux<br/>
                 Dossier suivi par :<br/>
@@ -267,8 +275,6 @@
             </p>
         </div>
     </header>
-
-    <h1 class="paeh-titre">Notification de Plan d'accompagnement de l'étudiant en situation de handicap (PAEH)</h1>
 
     <main>
         <div class="paeh-header">
