@@ -131,6 +131,53 @@ class UtilisateurManagerTest extends ApiTestCaseCustom
         $this->assertSame('FRANCE', $adresse->getPays());
     }
 
+    public function testMajInscriptionsRafraichitInscriptionExistante(): void
+    {
+        // OBC-3 : le compteur d'inscriptions à l'étape et le cursus aménagé
+        // évoluent côté SI en cours d'année pour une inscription déjà connue :
+        // la MAJ doit rafraîchir ces champs sur l'inscription EXISTANTE, sans
+        // la recréer. On exerce le vrai UtilisateurManager via le
+        // FakeSiScolDataProvider reconfiguré entre les deux appels.
+        $container = static::getContainer();
+        $em = $container->get('doctrine')->getManager();
+        // 'demandeur' porte un numeroEtudiant (123456), donc la MAJ scol se déclenche.
+        $user = $em->getRepository(Utilisateur::class)->findOneBy(['uid' => 'demandeur']);
+
+        /** @var UtilisateurManager $manager */
+        $manager = $container->get(UtilisateurManager::class);
+
+        $debut = new \DateTime('2024-09-01');
+        $fin = new \DateTime('2025-08-31');
+
+        // Premier appel : création de l'inscription renvoyée par le mock
+        FakeSiScolDataProvider::$codeEtape = 'ETP1';
+        FakeSiScolDataProvider::$nombreInscriptionsEtape = 1;
+        FakeSiScolDataProvider::$codeCursusAmenage = null;
+        FakeSiScolDataProvider::$libelleCursusAmenage = null;
+        $manager->majInscriptionsEtIdentite($user, $debut, $fin);
+
+        $this->assertCount(1, $user->getInscriptions());
+        $inscription = $user->getInscriptions()->first();
+        $idInitial = $inscription->getId();
+        $this->assertSame('ETP1', $inscription->getCodeEtape());
+        $this->assertSame(1, $inscription->getNombreInscriptionsEtape());
+        $this->assertNull($inscription->getCodeCursusAmenage());
+
+        // Second appel : le SI a incrémenté le compteur et posé un cursus aménagé
+        FakeSiScolDataProvider::$nombreInscriptionsEtape = 2;
+        FakeSiScolDataProvider::$codeCursusAmenage = 'CA';
+        FakeSiScolDataProvider::$libelleCursusAmenage = 'Cursus aménagé handicap';
+        $manager->majInscriptionsEtIdentite($user, $debut, $fin);
+
+        $this->assertCount(1, $user->getInscriptions());
+        $inscription = $user->getInscriptions()->first();
+        $this->assertSame($idInitial, $inscription->getId(), "L'inscription ne doit pas être recréée");
+        $this->assertSame('ETP1', $inscription->getCodeEtape());
+        $this->assertSame(2, $inscription->getNombreInscriptionsEtape());
+        $this->assertSame('CA', $inscription->getCodeCursusAmenage());
+        $this->assertSame('Cursus aménagé handicap', $inscription->getLibelleCursusAmenage());
+    }
+
     protected function tearDown(): void
     {
         // Réinitialise le mock situation sociale pour ne pas polluer les autres tests.
@@ -144,6 +191,11 @@ class UtilisateurManagerTest extends ApiTestCaseCustom
         FakeSiScolDataProvider::$adresseCodePostal = null;
         FakeSiScolDataProvider::$adresseVille = null;
         FakeSiScolDataProvider::$adressePays = null;
+        // Idem pour le mock des données d'étape.
+        FakeSiScolDataProvider::$codeEtape = null;
+        FakeSiScolDataProvider::$nombreInscriptionsEtape = null;
+        FakeSiScolDataProvider::$codeCursusAmenage = null;
+        FakeSiScolDataProvider::$libelleCursusAmenage = null;
         parent::tearDown();
     }
 

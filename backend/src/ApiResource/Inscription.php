@@ -86,6 +86,92 @@ final class Inscription
         }
     }
 
+    /**
+     * OBC-3 — code étape Apogée conservé pour exposer le cursus
+     * d'inscription du bénéficiaire et permettre au front de regrouper
+     * les inscriptions du même parcours.
+     */
+    #[Groups([Utilisateur::GROUP_OUT, Demande::GROUP_OUT, Utilisateur::AMENAGEMENTS_UTILISATEURS_OUT])]
+    public ?string $codeEtape {
+        get {
+            $prop = new ReflectionProperty(self::class, 'codeEtape');
+            if (!$prop->isInitialized($this) && $this->entity !== null) {
+                $this->codeEtape = $this->entity->getCodeEtape();
+            }
+            return $this->codeEtape ?? null;
+        }
+    }
+
+    /**
+     * OBC-3 — niveau d'études (L1/L2/L3/M1/M2/D1/D2/D3) dérivé à la volée
+     * du préfixe du code étape via NiveauExtractor. null pour les codes
+     * hors barème (PASS, LAS, codes locaux). Jamais persisté.
+     *
+     * Positionné en post-traitement de Formation::niveau : ce dernier
+     * porte le niveau brut Apogée (NIVEAU) du diplôme, tandis que cette
+     * propriété expose un niveau LMD normalisé par inscription.
+     */
+    #[Groups([Utilisateur::GROUP_OUT, Demande::GROUP_OUT, Utilisateur::AMENAGEMENTS_UTILISATEURS_OUT])]
+    public ?string $niveau {
+        get {
+            $prop = new ReflectionProperty(self::class, 'niveau');
+            if (!$prop->isInitialized($this) && $this->entity !== null) {
+                $this->niveau = (new \App\Service\SiScol\NiveauExtractor())->extract($this->entity->getCodeEtape());
+            }
+            return $this->niveau ?? null;
+        }
+    }
+
+    /**
+     * OBC-3 — code du cursus aménagé SISE (cod_sis_cur_amg). null hors
+     * cursus aménagé.
+     */
+    #[Groups([Utilisateur::GROUP_OUT, Demande::GROUP_OUT, Utilisateur::AMENAGEMENTS_UTILISATEURS_OUT])]
+    public ?string $codeCursusAmenage {
+        get {
+            $prop = new ReflectionProperty(self::class, 'codeCursusAmenage');
+            if (!$prop->isInitialized($this) && $this->entity !== null) {
+                $this->codeCursusAmenage = $this->entity->getCodeCursusAmenage();
+            }
+            return $this->codeCursusAmenage ?? null;
+        }
+    }
+
+    /**
+     * OBC-3 — libellé du cursus aménagé (lib_cur_amg), affiché tel quel
+     * sur la fiche bénéficiaire. null hors cursus aménagé.
+     */
+    #[Groups([Utilisateur::GROUP_OUT, Demande::GROUP_OUT, Utilisateur::AMENAGEMENTS_UTILISATEURS_OUT])]
+    public ?string $libelleCursusAmenage {
+        get {
+            $prop = new ReflectionProperty(self::class, 'libelleCursusAmenage');
+            if (!$prop->isInitialized($this) && $this->entity !== null) {
+                $this->libelleCursusAmenage = $this->entity->getLibelleCursusAmenage();
+            }
+            return $this->libelleCursusAmenage ?? null;
+        }
+    }
+
+    /**
+     * OBC-3 — redoublement dérivé à la volée du compteur natif Apogée
+     * (nbr_ins_etp) via RedoublementCalculator (règle officielle Robin
+     * Kaczala 23/06/2026 : > 1 ⇒ redoublant), avec garde cursus aménagé.
+     * Jamais persisté.
+     */
+    #[Groups([Utilisateur::GROUP_OUT, Demande::GROUP_OUT, Utilisateur::AMENAGEMENTS_UTILISATEURS_OUT])]
+    public bool $redoublant {
+        get {
+            $prop = new ReflectionProperty(self::class, 'redoublant');
+            if (!$prop->isInitialized($this) && $this->entity !== null) {
+                $this->redoublant = (new \App\Service\SiScol\RedoublementCalculator())->estRedoublant(
+                    $this->entity->getNombreInscriptionsEtape(),
+                    $this->entity->getCodeCursusAmenage(),
+                );
+            }
+            return $this->redoublant ?? false;
+        }
+    }
+
     public function __construct(
         private readonly ?\App\Entity\Inscription $entity = null,
     ) {}

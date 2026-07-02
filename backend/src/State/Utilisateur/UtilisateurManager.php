@@ -560,6 +560,13 @@ readonly class UtilisateurManager
                 ) {
                     //trouvée, on passe son chemin
                     unset($inscriptions[$id]);
+                    //rafraîchissement des données d'étape : le compteur d'inscriptions
+                    //et le cursus aménagé peuvent évoluer côté SI en cours d'année
+                    $existante
+                        ->setCodeEtape($inscription['codeEtape'] ?? null)
+                        ->setNombreInscriptionsEtape($inscription['nombreInscriptionsEtape'] ?? null)
+                        ->setCodeCursusAmenage($inscription['codeCursusAmenage'] ?? null)
+                        ->setLibelleCursusAmenage($inscription['libelleCursusAmenage'] ?? null);
                     if (null === $existante->getFormation()->getDiplome()) {
                         //rattrapage pour bilan activité
                         $formation = $this->formationManager->getFormation(
@@ -590,7 +597,13 @@ readonly class UtilisateurManager
                 discipline: $inscription['discipline'],
                 diplome: $inscription['diplome'],
             );
-            $new->setDebut($inscription['debut'])->setFin($inscription['fin'])->setFormation($formation);
+            $new->setDebut($inscription['debut'])
+                ->setFin($inscription['fin'])
+                ->setFormation($formation)
+                ->setCodeEtape($inscription['codeEtape'] ?? null)
+                ->setNombreInscriptionsEtape($inscription['nombreInscriptionsEtape'] ?? null)
+                ->setCodeCursusAmenage($inscription['codeCursusAmenage'] ?? null)
+                ->setLibelleCursusAmenage($inscription['libelleCursusAmenage'] ?? null);
 
             $utilisateur->addInscription($new);
         }

@@ -26,7 +26,10 @@ select iae.cod_anu,
        case when annuelle.cod_ind_ina is not null then annuelle.lib_ad3 else fixe.lib_ad3 end as adr_lib_ad3,
        case when annuelle.cod_ind_ina is not null then annuelle.cod_bdi else fixe.cod_bdi end as adr_cod_bdi,
        case when annuelle.cod_ind_ina is not null then annuelle.lib_vil else fixe.lib_vil end as adr_lib_vil,
-       case when annuelle.cod_ind_ina is not null then annuelle.cod_pay else fixe.cod_pay end as adr_cod_pay
+       case when annuelle.cod_ind_ina is not null then annuelle.cod_pay else fixe.cod_pay end as adr_cod_pay,
+       iae.nbr_ins_etp,
+       amg.cod_sis_cur_amg,
+       amg.lib_cur_amg
 from ins_adm_etp iae
          join diplome dip on dip.cod_dip = iae.cod_dip
          left outer join sec_dis_sis sds on sds.cod_sds = dip.cod_sds
@@ -38,6 +41,7 @@ from ins_adm_etp iae
          left outer join sit_sociale soc ON (soc.cod_soc = iaa.cod_soc)
          join composante cmp on cmp.cod_cmp = iae.cod_cmp
          join version_etape vet on vet.cod_etp = iae.cod_etp and vet.cod_vrs_vet = iae.cod_vrs_vet
+         left outer join cursus_amg amg on (amg.cod_cur_amg = iae.cod_cur_amg)
          left outer join adresse fixe on fixe.cod_ind = i.cod_ind
          left outer join adresse annuelle on annuelle.cod_ind_ina = i.cod_ind and annuelle.cod_anu_ina = iae.cod_anu
 where i.cod_etu = :codEtu
