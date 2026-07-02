@@ -85,6 +85,16 @@ export function ScolariteListItem({
             {inscription.codeEtape && (
               <div className="text-secondary fs-08 mt-1">Étape&nbsp;: {inscription.codeEtape}</div>
             )}
+            {inscription.formation?.diplome && (
+              <div className="text-secondary fs-08 mt-1">
+                Diplôme&nbsp;: {inscription.formation.diplome}
+              </div>
+            )}
+            {inscription.formation?.discipline && (
+              <div className="text-secondary fs-08 mt-1">
+                Discipline&nbsp;: {inscription.formation.discipline}
+              </div>
+            )}
           </div>
         }
         description={getLibellePeriode(inscription.debut, inscription.fin, "MMM")}

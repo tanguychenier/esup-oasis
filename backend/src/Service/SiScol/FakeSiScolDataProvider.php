@@ -20,6 +20,17 @@ use DateTimeInterface;
 class FakeSiScolDataProvider extends AbstractSiScolDataProvider
 {
     /**
+     * Données d'étape simulées renvoyées par le mock, surchargeables depuis les
+     * tests pour exercer les différentes branches de la projection réelle
+     * (UtilisateurManager) sans dépendre d'Apogée. Valeurs par défaut : null,
+     * comme un SI qui ne renseigne pas ces champs.
+     */
+    public static ?string $codeEtape = null;
+    public static ?int $nombreInscriptionsEtape = null;
+    public static ?string $codeCursusAmenage = null;
+    public static ?string $libelleCursusAmenage = null;
+
+    /**
      * @inheritDoc
      */
     public function getInscriptions(Utilisateur $etudiant, DateTimeInterface $debut, ?DateTimeInterface $fin): array
@@ -53,6 +64,10 @@ class FakeSiScolDataProvider extends AbstractSiScolDataProvider
                 'niveau' => 'L1',
                 'discipline' => 'Informatique',
                 'diplome' => 'Licence',
+                'codeEtape' => self::$codeEtape,
+                'nombreInscriptionsEtape' => self::$nombreInscriptionsEtape,
+                'codeCursusAmenage' => self::$codeCursusAmenage,
+                'libelleCursusAmenage' => self::$libelleCursusAmenage,
             ],
         ];
     }
