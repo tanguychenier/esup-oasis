@@ -103,12 +103,47 @@ class UtilisateurManagerTest extends ApiTestCaseCustom
         $this->assertTrue($user->isBoursier(), 'Le témoin legacy boursier doit rester honoré');
     }
 
+    public function testMajInscriptionsProjetteAdresse(): void
+    {
+        // OBC-1 — l'adresse Apogée de la dernière inscription est projetée vers
+        // Utilisateur::adresse. Ligne2 (AD2) et complément (AD3) sont concaténés
+        // sur ligne2 car notre modèle ne porte que deux lignes.
+        FakeSiScolDataProvider::$adresseLigne1 = '12 rue des Lilas';
+        FakeSiScolDataProvider::$adresseLigne2 = 'Bâtiment B';
+        FakeSiScolDataProvider::$adresseComplement = 'Appartement 42';
+        FakeSiScolDataProvider::$adresseCodePostal = '33000';
+        FakeSiScolDataProvider::$adresseVille = 'Bordeaux';
+        FakeSiScolDataProvider::$adressePays = 'FRANCE';
+
+        $container = static::getContainer();
+        $em = $container->get('doctrine')->getManager();
+        $user = $em->getRepository(Utilisateur::class)->findOneBy(['uid' => 'demandeur']);
+
+        /** @var UtilisateurManager $manager */
+        $manager = $container->get(UtilisateurManager::class);
+        $manager->majInscriptionsEtIdentite($user, new \DateTime('2024-09-01'), new \DateTime('2025-08-31'));
+
+        $adresse = $user->getAdresse();
+        $this->assertSame('12 rue des Lilas', $adresse->getLigne1());
+        $this->assertSame('Bâtiment B Appartement 42', $adresse->getLigne2());
+        $this->assertSame('33000', $adresse->getCodePostal());
+        $this->assertSame('Bordeaux', $adresse->getVille());
+        $this->assertSame('FRANCE', $adresse->getPays());
+    }
+
     protected function tearDown(): void
     {
         // Réinitialise le mock situation sociale pour ne pas polluer les autres tests.
         FakeSiScolDataProvider::$boursier = false;
         FakeSiScolDataProvider::$codeSituationSociale = 'NO';
         FakeSiScolDataProvider::$libelleSituationSociale = 'Normal';
+        // Idem pour l'adresse simulée.
+        FakeSiScolDataProvider::$adresseLigne1 = null;
+        FakeSiScolDataProvider::$adresseLigne2 = null;
+        FakeSiScolDataProvider::$adresseComplement = null;
+        FakeSiScolDataProvider::$adresseCodePostal = null;
+        FakeSiScolDataProvider::$adresseVille = null;
+        FakeSiScolDataProvider::$adressePays = null;
         parent::tearDown();
     }
 

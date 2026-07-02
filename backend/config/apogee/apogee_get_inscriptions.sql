@@ -19,12 +19,14 @@ select iae.cod_anu,
        lib_dip,
        niveau,
        dsi.lib_dsi,
-       coalesce(annuelle.lib_ad1, fixe.lib_ad1) as adr_lib_ad1,
-       coalesce(annuelle.lib_ad2, fixe.lib_ad2) as adr_lib_ad2,
-       coalesce(annuelle.lib_ad3, fixe.lib_ad3) as adr_lib_ad3,
-       coalesce(annuelle.cod_bdi, fixe.cod_bdi) as adr_cod_bdi,
-       coalesce(annuelle.lib_vil, fixe.lib_vil) as adr_lib_vil,
-       coalesce(annuelle.cod_pay, fixe.cod_pay) as adr_cod_pay
+       -- adresse choisie en bloc (annuelle si elle existe, sinon fixe) : un coalesce
+       -- colonne par colonne mélangerait les deux adresses quand l'annuelle est partielle
+       case when annuelle.cod_ind_ina is not null then annuelle.lib_ad1 else fixe.lib_ad1 end as adr_lib_ad1,
+       case when annuelle.cod_ind_ina is not null then annuelle.lib_ad2 else fixe.lib_ad2 end as adr_lib_ad2,
+       case when annuelle.cod_ind_ina is not null then annuelle.lib_ad3 else fixe.lib_ad3 end as adr_lib_ad3,
+       case when annuelle.cod_ind_ina is not null then annuelle.cod_bdi else fixe.cod_bdi end as adr_cod_bdi,
+       case when annuelle.cod_ind_ina is not null then annuelle.lib_vil else fixe.lib_vil end as adr_lib_vil,
+       case when annuelle.cod_ind_ina is not null then annuelle.cod_pay else fixe.cod_pay end as adr_cod_pay
 from ins_adm_etp iae
          join diplome dip on dip.cod_dip = iae.cod_dip
          left outer join sec_dis_sis sds on sds.cod_sds = dip.cod_sds
