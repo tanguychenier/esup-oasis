@@ -50,7 +50,7 @@ class Inscription
     private ?string $codeEtape = null;
 
     /**
-     * OBC-3 — compteur natif Apogée (nbr_ins_etp) du nombre
+     * compteur natif Apogée (nbr_ins_etp) du nombre
      * d'inscriptions administratives à l'étape. Base officielle du
      * calcul du redoublement (cf. RedoublementCalculator).
      */
@@ -58,7 +58,7 @@ class Inscription
     private ?int $nombreInscriptionsEtape = null;
 
     /**
-     * OBC-3 — code du cursus aménagé SISE (cod_sis_cur_amg). Sa présence
+     * code du cursus aménagé SISE (cod_sis_cur_amg). Sa présence
      * neutralise le calcul du redoublement (étalement / contrat
      * pédagogique pluri-annuel) et alimente l'affichage "cursus aménagé".
      */
@@ -66,11 +66,27 @@ class Inscription
     private ?string $codeCursusAmenage = null;
 
     /**
-     * OBC-3 — libellé du cursus aménagé (lib_cur_amg), affiché tel quel
+     * libellé du cursus aménagé (lib_cur_amg), affiché tel quel
      * sur la fiche bénéficiaire.
      */
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $libelleCursusAmenage = null;
+
+    /**
+     * Cycle du diplôme Apogée (cod_cyc : 1 = Licence, 2 = Master,
+     * 3 = Doctorat). Donne le niveau d'entrée (bac+N). Couplé à
+     * anneeDansDiplome, permet de dériver le niveau LMD via NiveauResolver.
+     */
+    #[ORM\Column(nullable: true)]
+    private ?int $cycle = null;
+
+    /**
+     * Année dans le diplôme (Apogée cod_sis_daa, codage SISE national,
+     * donc multi-établissements). niveau (bac+N) = niveau d'entrée du
+     * cycle + anneeDansDiplome.
+     */
+    #[ORM\Column(nullable: true)]
+    private ?int $anneeDansDiplome = null;
 
     public function getId(): ?int
     {
@@ -169,6 +185,30 @@ class Inscription
     public function setLibelleCursusAmenage(?string $libelleCursusAmenage): self
     {
         $this->libelleCursusAmenage = $libelleCursusAmenage;
+
+        return $this;
+    }
+
+    public function getCycle(): ?int
+    {
+        return $this->cycle;
+    }
+
+    public function setCycle(?int $cycle): self
+    {
+        $this->cycle = $cycle;
+
+        return $this;
+    }
+
+    public function getAnneeDansDiplome(): ?int
+    {
+        return $this->anneeDansDiplome;
+    }
+
+    public function setAnneeDansDiplome(?int $anneeDansDiplome): self
+    {
+        $this->anneeDansDiplome = $anneeDansDiplome;
 
         return $this;
     }

@@ -77,7 +77,7 @@ class ApogeeProvider extends AbstractSiScolDataProvider
                 'debut' => new DateTime($row->COD_ANU . '-09-01'),
                 'fin' => new DateTime(($row->COD_ANU + 1) . '-08-31'),
                 'boursier' => $row->TEM_BRS_IAA == 'O',
-                // OBC-1 critère 2 — situation sociale Apogée (oci renvoie les colonnes en MAJUSCULES).
+                // situation sociale Apogée (oci renvoie les colonnes en MAJUSCULES).
                 // TODO(apogée-réel) : confirmer le nom exact de colonne cod_soc (vs cod_sco) et les
                 // valeurs réelles du code non-boursier sur l'instance Apogée Saclay.
                 'codeSituationSociale' => isset($row->COD_SOC) ? trim($row->COD_SOC) : null,
@@ -86,28 +86,32 @@ class ApogeeProvider extends AbstractSiScolDataProvider
                 'niveau' => $row->NIVEAU,
                 'discipline' => $row->LIB_DSI,
                 'diplome' => $row->LIB_DIP,
-                // OBC-1 — adresse postale (annuelle puis fixe en fallback)
+                // adresse postale (annuelle puis fixe en fallback)
                 'adresseLigne1' => isset($row->ADR_LIB_AD1) ? trim($row->ADR_LIB_AD1) : null,
                 'adresseLigne2' => isset($row->ADR_LIB_AD2) ? trim($row->ADR_LIB_AD2) : null,
                 'adresseComplement' => isset($row->ADR_LIB_AD3) ? trim($row->ADR_LIB_AD3) : null,
                 'adresseCodePostal' => isset($row->ADR_COD_BDI) ? trim($row->ADR_COD_BDI) : null,
                 'adresseVille' => isset($row->ADR_LIB_VIL) ? trim($row->ADR_LIB_VIL) : null,
                 'adressePays' => isset($row->ADR_COD_PAY) ? trim($row->ADR_COD_PAY) : null,
-                // OBC-3 — code étape (cod_etp) pour exposer le cursus
+                // code étape (cod_etp) pour exposer le cursus
                 // d'inscription et en dériver le niveau LMD côté API.
                 'codeEtape' => isset($row->COD_ETP) ? trim($row->COD_ETP) : null,
-                // OBC-3 — compteur natif (nbr_ins_etp) du nombre
+                // compteur natif (nbr_ins_etp) du nombre
                 // d'inscriptions à l'étape, base du calcul redoublement.
                 // TODO(apogée-réel): confirmer la sémantique exacte de
                 // nbr_ins_etp avec la DSI (incrémenté aussi sur
                 // changement d'accréditation/régime, cf. limite documentée
                 // dans RedoublementCalculator).
                 'nombreInscriptionsEtape' => isset($row->NBR_INS_ETP) ? (int) $row->NBR_INS_ETP : null,
-                // OBC-3 — cursus aménagé SISE (cod_sis_cur_amg / lib_cur_amg).
+                // cursus aménagé SISE (cod_sis_cur_amg / lib_cur_amg).
                 // TODO(apogée-réel): confirmer le rattachement
                 // cod_cur_amg sur ins_adm_etp et la table cursus_amg.
                 'codeCursusAmenage' => isset($row->COD_SIS_CUR_AMG) ? trim($row->COD_SIS_CUR_AMG) : null,
                 'libelleCursusAmenage' => isset($row->LIB_CUR_AMG) ? trim($row->LIB_CUR_AMG) : null,
+                // Cycle du diplôme (cod_cyc) + année dans le diplôme (cod_sis_daa,
+                // SISE national) : base du niveau LMD dérivé côté API par NiveauResolver.
+                'cycle' => isset($row->CYCLE) && trim((string) $row->CYCLE) !== '' ? (int) $row->CYCLE : null,
+                'anneeDansDiplome' => isset($row->ANNEE_DIPLOME) && trim((string) $row->ANNEE_DIPLOME) !== '' ? (int) $row->ANNEE_DIPLOME : null,
             ];
         }
 

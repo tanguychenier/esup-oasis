@@ -17,7 +17,7 @@ select iae.cod_anu,
        soc.lib_soc,
        rgi.lib_rgi,
        lib_dip,
-       ' ' as niveau, -- niveau à blanc : table apogee.extern_niveau_etape absente à UPSaclay (spécifique UB) ; dérivé côté OASIS par NiveauExtractor
+       ' ' as niveau, -- niveau brut laissé à blanc (table apogee.extern_niveau_etape non disponible ici) ; le niveau LMD est dérivé côté OASIS par NiveauResolver à partir de cycle + annee_diplome (données SISE nationales)
        dsi.lib_dsi,
        -- adresse : schéma UPSaclay = adresse ANNUELLE seule (la fixe ne sert qu'au téléphone).
        -- Ville via jointure commune (lib_ade en repli acheminement étranger), pays via jointure pays (libellé).
@@ -29,7 +29,13 @@ select iae.cod_anu,
        pay.lib_pay as adr_cod_pay,
        iae.nbr_ins_etp,
        amg.cod_sis_cur_amg,
-       amg.lib_cur_amg
+       amg.lib_cur_amg,
+       dip.cod_cyc as cycle, -- cycle du diplôme (1=Licence bac+0, 2=Master bac+3, 3=Doctorat bac+5) : niveau d'entrée
+       (select min(fra.cod_sis_daa_min)
+        from vdi_fractionner_vet fra
+        where fra.cod_etp = iae.cod_etp
+          and fra.cod_vrs_vet = iae.cod_vrs_vet
+          and fra.cod_dip = iae.cod_dip) as annee_diplome -- année dans le diplôme (cod_sis_daa, SISE national) ; niveau = entrée(cycle) + annee_diplome
 from ins_adm_etp iae
          join diplome dip on dip.cod_dip = iae.cod_dip
          left outer join sec_dis_sis sds on sds.cod_sds = dip.cod_sds

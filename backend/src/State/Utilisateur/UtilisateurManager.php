@@ -524,7 +524,7 @@ readonly class UtilisateurManager
 
             $last = array_key_last($inscriptions);
 
-            // OBC-1 critère 2 — situation sociale Apogée projetée depuis la dernière inscription.
+            // situation sociale Apogée projetée depuis la dernière inscription.
             $codeSituationSociale = $inscriptions[$last]['codeSituationSociale'] ?? null;
             $utilisateur->setCodeSituationSociale($codeSituationSociale);
             $utilisateur->setLibelleSituationSociale($inscriptions[$last]['libelleSituationSociale'] ?? null);
@@ -537,7 +537,7 @@ readonly class UtilisateurManager
             );
             $utilisateur->setStatutEtudiant($inscriptions[$last]['statut'] ?? '');
 
-            // OBC-1 — projection de l'adresse Apogée la plus récente vers Utilisateur::adresse.
+            // projection de l'adresse Apogée la plus récente vers Utilisateur::adresse.
             // Les lignes ligne2 (Apogée AD2) et complement (AD3) sont concaténées sur la même ligne
             // d'affichage car notre modèle ne porte que ligne1/ligne2.
             $adresse = $utilisateur->getAdresse();
@@ -566,7 +566,9 @@ readonly class UtilisateurManager
                         ->setCodeEtape($inscription['codeEtape'] ?? null)
                         ->setNombreInscriptionsEtape($inscription['nombreInscriptionsEtape'] ?? null)
                         ->setCodeCursusAmenage($inscription['codeCursusAmenage'] ?? null)
-                        ->setLibelleCursusAmenage($inscription['libelleCursusAmenage'] ?? null);
+                        ->setLibelleCursusAmenage($inscription['libelleCursusAmenage'] ?? null)
+                        ->setCycle($inscription['cycle'] ?? null)
+                        ->setAnneeDansDiplome($inscription['anneeDansDiplome'] ?? null);
                     if (null === $existante->getFormation()->getDiplome()) {
                         //rattrapage pour bilan activité
                         $formation = $this->formationManager->getFormation(
@@ -603,7 +605,9 @@ readonly class UtilisateurManager
                 ->setCodeEtape($inscription['codeEtape'] ?? null)
                 ->setNombreInscriptionsEtape($inscription['nombreInscriptionsEtape'] ?? null)
                 ->setCodeCursusAmenage($inscription['codeCursusAmenage'] ?? null)
-                ->setLibelleCursusAmenage($inscription['libelleCursusAmenage'] ?? null);
+                ->setLibelleCursusAmenage($inscription['libelleCursusAmenage'] ?? null)
+                ->setCycle($inscription['cycle'] ?? null)
+                ->setAnneeDansDiplome($inscription['anneeDansDiplome'] ?? null);
 
             $utilisateur->addInscription($new);
         }

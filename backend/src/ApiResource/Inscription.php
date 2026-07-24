@@ -87,7 +87,7 @@ final class Inscription
     }
 
     /**
-     * OBC-3 — code étape Apogée conservé pour exposer le cursus
+     * code étape Apogée conservé pour exposer le cursus
      * d'inscription du bénéficiaire et permettre au front de regrouper
      * les inscriptions du même parcours.
      */
@@ -103,27 +103,29 @@ final class Inscription
     }
 
     /**
-     * OBC-3 — niveau d'études (L1/L2/L3/M1/M2/D1/D2/D3) dérivé à la volée
-     * du préfixe du code étape via NiveauExtractor. null pour les codes
-     * hors barème (PASS, LAS, codes locaux). Jamais persisté.
-     *
-     * Positionné en post-traitement de Formation::niveau : ce dernier
-     * porte le niveau brut Apogée (NIVEAU) du diplôme, tandis que cette
-     * propriété expose un niveau LMD normalisé par inscription.
+     * Niveau d'études (L1/L2/L3/M1/M2/D1/D2/D3) dérivé à la volée, jamais
+     * persisté. En priorité via NiveauResolver à partir des données Apogée
+     * nationales (cycle du diplôme + année dans le diplôme) ; repli sur
+     * NiveauExtractor (préfixe du code étape) pour les instances où le code
+     * encode le niveau (L1INFO, M1ARTS…). null quand le niveau n'est pas
+     * applicable (PASS, LAS, codes locaux).
      */
     #[Groups([Utilisateur::GROUP_OUT, Demande::GROUP_OUT, Utilisateur::AMENAGEMENTS_UTILISATEURS_OUT])]
     public ?string $niveau {
         get {
             $prop = new ReflectionProperty(self::class, 'niveau');
             if (!$prop->isInitialized($this) && $this->entity !== null) {
-                $this->niveau = (new \App\Service\SiScol\NiveauExtractor())->extract($this->entity->getCodeEtape());
+                $this->niveau = (new \App\Service\SiScol\NiveauResolver())->resolve(
+                    $this->entity->getCycle(),
+                    $this->entity->getAnneeDansDiplome(),
+                ) ?? (new \App\Service\SiScol\NiveauExtractor())->extract($this->entity->getCodeEtape());
             }
             return $this->niveau ?? null;
         }
     }
 
     /**
-     * OBC-3 — code du cursus aménagé SISE (cod_sis_cur_amg). null hors
+     * code du cursus aménagé SISE (cod_sis_cur_amg). null hors
      * cursus aménagé.
      */
     #[Groups([Utilisateur::GROUP_OUT, Demande::GROUP_OUT, Utilisateur::AMENAGEMENTS_UTILISATEURS_OUT])]
@@ -138,7 +140,7 @@ final class Inscription
     }
 
     /**
-     * OBC-3 — libellé du cursus aménagé (lib_cur_amg), affiché tel quel
+     * libellé du cursus aménagé (lib_cur_amg), affiché tel quel
      * sur la fiche bénéficiaire. null hors cursus aménagé.
      */
     #[Groups([Utilisateur::GROUP_OUT, Demande::GROUP_OUT, Utilisateur::AMENAGEMENTS_UTILISATEURS_OUT])]
@@ -153,7 +155,7 @@ final class Inscription
     }
 
     /**
-     * OBC-3 — redoublement dérivé à la volée du compteur natif Apogée
+     * redoublement dérivé à la volée du compteur natif Apogée
      * (nbr_ins_etp) via RedoublementCalculator (règle officielle Robin
      * Kaczala 23/06/2026 : > 1 ⇒ redoublant), avec garde cursus aménagé.
      * Jamais persisté.
