@@ -66,9 +66,9 @@ class ApogeeProvider extends AbstractSiScolDataProvider
         }
         $formations = [];
         while ($row = oci_fetch_object($stmt)) {
-            $numTel = $row->NUM_TEL;
-            $dateNai = $row->DATE_NAI_IND;
-            $codSexEtu = $row->COD_SEX_ETU;
+            $numTel = $row->NUM_TEL ?? null;
+            $dateNai = $row->DATE_NAI_IND ?? null;
+            $codSexEtu = $row->COD_SEX_ETU ?? null;
             $formations[] = [
                 'codeFormation' => $row->COD_ETP . '#' . $row->COD_VRS_VET,
                 'libFormation' => $row->LIB_WEB_VET,
@@ -83,7 +83,7 @@ class ApogeeProvider extends AbstractSiScolDataProvider
                 'codeSituationSociale' => isset($row->COD_SOC) ? trim($row->COD_SOC) : null,
                 'libelleSituationSociale' => isset($row->LIB_SOC) ? trim($row->LIB_SOC) : null,
                 'statut' => $row->LIB_RGI, //changement de dernière minute... on colle le régime dans le champ "statut"
-                'niveau' => $row->NIVEAU,
+                'niveau' => $row->NIVEAU ?? null,
                 'discipline' => $row->LIB_DSI,
                 'diplome' => $row->LIB_DIP,
                 // adresse postale (annuelle puis fixe en fallback)
@@ -178,7 +178,7 @@ class ApogeeProvider extends AbstractSiScolDataProvider
         if ($row = oci_fetch_object($stmt)) {
             $data = [
                 'diplome' => $row->LIB_DIP,
-                'niveau' => $row->NIVEAU,
+                'niveau' => $row->NIVEAU ?? null,
                 'discipline' => $row->LIB_DSI,
             ];
         }
