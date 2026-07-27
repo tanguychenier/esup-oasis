@@ -22,7 +22,6 @@ import "@routes/administration/Parametres/Parametres.scss";
 export default function Parametres(): ReactElement {
   return (
     <Layout.Content className="administration" style={{ padding: "0 50px" }}>
-      <Typography.Title level={1}>Administration</Typography.Title>
       <Breadcrumb
         className="mt-2"
         items={[
@@ -43,11 +42,14 @@ export default function Parametres(): ReactElement {
           },
         ]}
       />
-      <Typography.Title level={2}>Paramètres</Typography.Title>
+      <Typography.Title level={1}>Administration</Typography.Title>
+      <Typography.Title level={2} className="mt-0 mb-4">
+        Paramètres
+      </Typography.Title>
       <Typography.Paragraph>
         Vous pouvez modifier ici les constantes utilisées par l'application.
       </Typography.Paragraph>
-      <ParametresTable />
+      <ParametresTable masquerParametresMenu />
     </Layout.Content>
   );
 }
