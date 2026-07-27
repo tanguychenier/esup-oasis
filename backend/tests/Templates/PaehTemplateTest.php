@@ -29,9 +29,11 @@ final class PaehTemplateTest extends TestCase
             examens: [$this->amenagement('Tiers-temps aux examens', examens: true)],
         );
 
-        self::assertStringContainsString("Aménagements d'études", $html);
-        self::assertStringContainsString('Aides humaines', $html);
-        self::assertStringContainsString("Aménagements d'examens", $html);
+        // Sous-titres alignés sur la maquette (gris, suffixés « : »).
+        self::assertStringContainsString('Aménagements des études :', $html);
+        self::assertStringContainsString('Aides humaines :', $html);
+        self::assertStringContainsString('Aménagements des examens :', $html);
+        self::assertStringContainsString('class="sous-titre"', $html);
 
         self::assertStringContainsString('Tiers-temps en cours', $html);
         self::assertStringContainsString('Preneur de notes', $html);
@@ -46,28 +48,41 @@ final class PaehTemplateTest extends TestCase
             examens: [$this->amenagement('Tiers-temps aux examens', examens: true)],
         );
 
-        self::assertStringNotContainsString("Aménagements d'études", $html);
-        self::assertStringNotContainsString('Aides humaines', $html);
-        self::assertStringContainsString("Aménagements d'examens", $html);
+        self::assertStringNotContainsString('Aménagements des études :', $html);
+        self::assertStringNotContainsString('Aides humaines :', $html);
+        self::assertStringContainsString('Aménagements des examens :', $html);
     }
 
-    public function testTemplatePluralizesAmenagementSentenceFromTotalCount(): void
+    public function testTemplateRendersAucunAmenagementWhenNoCategoryHasAmenagements(): void
     {
-        $multipleHtml = $this->renderWith(
-            etudes: [$this->amenagement('A', pedagogique: true), $this->amenagement('B', pedagogique: true)],
+        $html = $this->renderWith(etudes: [], aidesHumaines: [], examens: []);
+
+        // Le titre de section reste, mais on affiche une mention explicite plutôt qu'un vide.
+        self::assertStringContainsString("Aménagements actifs pour l'année", $html);
+        self::assertStringContainsString("Aucun aménagement actif pour l'année.", $html);
+        self::assertStringNotContainsString('class="sous-titre"', $html);
+    }
+
+    public function testClosingParagraphsUseTheValidatedWording(): void
+    {
+        $html = $this->renderWith(
+            etudes: [$this->amenagement('Tiers-temps en cours', pedagogique: true)],
             aidesHumaines: [],
             examens: [],
         );
-        $singleHtml = $this->renderWith(
-            etudes: [],
-            aidesHumaines: [],
-            examens: [$this->amenagement('A', examens: true)],
-        );
 
-        // After the V4 refactor the "Je vous informe que j'ai pris la décision..." sentence is removed,
-        // but the closing paragraph still pluralises around the amendments count.
-        self::assertStringContainsString('Le bénéfice des aménagements', $multipleHtml);
-        self::assertStringContainsString("Le bénéfice de l'aménagement", $singleHtml);
+        // Formulation validée par le service handicap (retour métier 2026-07-27).
+        self::assertStringContainsString('Le bénéfice des aménagements vous est accordé', $html);
+        self::assertStringContainsString(
+            "En cas de nécessité, vos besoins pourront faire l'objet d'une nouvelle évaluation.",
+            $html,
+        );
+        self::assertStringContainsString(
+            'un entretien avec le service handicap de votre composante',
+            $html,
+        );
+        // La formule de politesse générique a été retirée pour coller à la maquette.
+        self::assertStringNotContainsString('Je vous prie de croire', $html);
     }
 
     public function testTemplateRendersTheNewVisaBlock(): void
@@ -78,9 +93,6 @@ final class PaehTemplateTest extends TestCase
             examens: [$this->amenagement('Tiers-temps aux examens', examens: true)],
         );
 
-        // Visa V9 (retours Ilona 2026-07-01) : les lignes "code de l'éducation" et
-        // "demande d'aménagements" ont été fusionnées en une seule référence aux
-        // articles D. 613-26 à D. 613-28, placée en 3e position.
         self::assertStringContainsString('<section class="visa-block">', $html);
         self::assertStringContainsString('Vu la loi n° 2005-102 du 11 février 2005', $html);
         self::assertStringContainsString('Vu la loi n° 2013-660 du 22 juillet 2013', $html);
@@ -92,14 +104,9 @@ final class PaehTemplateTest extends TestCase
         self::assertStringContainsString('Vu la circulaire du 6 février 2023', $html);
         self::assertStringContainsString('Vu la circulaire du 10 juillet 2024', $html);
         self::assertStringContainsString('Vu l\'avis du médecin', $html);
-        // La ligne narrative fusionnée ne doit plus apparaître telle quelle.
-        self::assertStringNotContainsString(
-            "Vu la demande d'aménagements pour la poursuite des études au titre de l'année universitaire",
-            $html,
-        );
     }
 
-    public function testTemplateRendersTheTitle(): void
+    public function testTemplateRendersTheTitleAndHeaderLines(): void
     {
         $html = $this->renderWith(
             etudes: [$this->amenagement('Tiers-temps en cours', pedagogique: true)],
@@ -107,16 +114,18 @@ final class PaehTemplateTest extends TestCase
             examens: [],
         );
 
-        // Titre demandé par Ilona (2026-07-01), placé sous le logo.
+        // Titre inclusif conservé (ne suit pas la formulation « Handicapé » de la maquette).
         self::assertStringContainsString('class="paeh-titre"', $html);
         self::assertStringContainsString(
             "Notification de Plan d'accompagnement de l'étudiant en situation de handicap (PAEH)",
             $html,
         );
 
-        // Alignement maquette : ligne Version et intitulé global des aménagements.
+        self::assertStringContainsString('Année universitaire : 2026-2027', $html);
         self::assertStringContainsString('Version : Notification initiale', $html);
+        // Intitulé global des aménagements en titre de section (filet, pas de soulignement).
         self::assertStringContainsString("Aménagements actifs pour l'année", $html);
+        self::assertStringContainsString('class="section-titre"', $html);
     }
 
     public function testTemplateRemovesOldIntroAndAnnouncementSentences(): void
@@ -127,9 +136,7 @@ final class PaehTemplateTest extends TestCase
             examens: [],
         );
 
-        // The pre-V4 intro paragraph must not appear anymore.
         self::assertStringNotContainsString('Vous avez sollicité', $html);
-        // The "Je vous informe que j'ai pris la décision..." sentence must be gone too.
         self::assertStringNotContainsString("Je vous informe que j'ai pris la décision", $html);
     }
 
@@ -175,7 +182,6 @@ final class PaehTemplateTest extends TestCase
     {
         $html = $this->renderWith(etudes: [], aidesHumaines: [], examens: []);
 
-        // The title is a static literal in the template, so Twig outputs it verbatim.
         self::assertStringContainsString("<title>Décision d'établissement</title>", $html);
     }
 
@@ -215,7 +221,7 @@ final class PaehTemplateTest extends TestCase
         self::assertStringNotContainsString('<section class="observations">', $htmlBlank);
     }
 
-    public function testDestinataireRendersBirthDateAndStudentNumberWhenPresent(): void
+    public function testDestinataireSectionRendersIdentityFields(): void
     {
         $html = $this->renderWith(
             etudes: [],
@@ -225,8 +231,13 @@ final class PaehTemplateTest extends TestCase
             numeroEtudiant: '21800123',
         );
 
-        self::assertStringContainsString('Né(e) le 15/04/2002', $html);
-        self::assertStringContainsString('N° étudiant : 21800123', $html);
+        // Bloc « Destinataire : » en section (2 colonnes) conforme à la maquette.
+        self::assertStringContainsString('Destinataire :', $html);
+        self::assertStringContainsString('class="destinataire-grid"', $html);
+        self::assertStringContainsString('Nom : DOE', $html);
+        self::assertStringContainsString('Prénom : Jane', $html);
+        self::assertStringContainsString('Date de naissance : 15/04/2002', $html);
+        self::assertStringContainsString("Numéro d'étudiant : 21800123", $html);
     }
 
     public function testDestinataireOmitsBirthDateAndStudentNumberWhenAbsent(): void
@@ -239,34 +250,47 @@ final class PaehTemplateTest extends TestCase
             numeroEtudiant: null,
         );
 
-        self::assertStringNotContainsString('Né(e) le', $html);
-        self::assertStringNotContainsString('N° étudiant', $html);
+        self::assertStringNotContainsString('Date de naissance :', $html);
+        self::assertStringNotContainsString("Numéro d'étudiant :", $html);
     }
 
-    public function testEstablishmentBrandingIsConfigurableAndFallsBackToUpstreamDefaults(): void
+    public function testServiceReferentBlockIsHiddenByDefaultAndShownWhenEnabled(): void
     {
-        // Sans globals fournis, le template retombe sur les valeurs upstream.
+        // Par défaut le service handicap a validé le document sans l'encart « dossier suivi par ».
         $default = $this->renderWith(etudes: [], aidesHumaines: [], examens: []);
-        self::assertStringContainsString('Université de Bordeaux', $default);
-        self::assertStringContainsString('Service PHASE', $default);
-        self::assertStringContainsString('Talence, le', $default);
+        self::assertStringNotContainsString('Dossier suivi par', $default);
+        self::assertStringNotContainsString('Service PHASE', $default);
 
-        // Avec les globals établissement, le branding est entièrement surchargé.
-        $custom = $this->renderWith(
+        // Activable par paramétrage, il réaffiche l'établissement, le service et le gestionnaire.
+        $withReferent = $this->renderWith(
             etudes: [],
             aidesHumaines: [],
             examens: [],
             branding: [
+                'afficherServiceReferent' => true,
                 'etablissementNom' => 'Université Paris-Saclay',
                 'serviceNom' => 'Service Accompagnement Étudiants',
-                'etablissementVille' => 'Orsay',
             ],
         );
-        self::assertStringContainsString('Université Paris-Saclay', $custom);
-        self::assertStringContainsString('Service Accompagnement Étudiants', $custom);
-        self::assertStringContainsString('Orsay, le', $custom);
-        self::assertStringNotContainsString('Université de Bordeaux', $custom);
-        self::assertStringNotContainsString('Service PHASE', $custom);
+        self::assertStringContainsString('Dossier suivi par', $withReferent);
+        self::assertStringContainsString('Université Paris-Saclay', $withReferent);
+        self::assertStringContainsString('Service Accompagnement Étudiants', $withReferent);
+        self::assertStringContainsString('Alice Dupont', $withReferent);
+    }
+
+    public function testFaitALineUsesConfiguredCityAndFallsBackToUpstreamDefault(): void
+    {
+        $default = $this->renderWith(etudes: [], aidesHumaines: [], examens: []);
+        self::assertStringContainsString('Fait à Talence, le', $default);
+
+        $custom = $this->renderWith(
+            etudes: [],
+            aidesHumaines: [],
+            examens: [],
+            branding: ['etablissementVille' => 'Orsay'],
+        );
+        self::assertStringContainsString('Fait à Orsay, le', $custom);
+        self::assertStringNotContainsString('Fait à Talence', $custom);
     }
 
     /**

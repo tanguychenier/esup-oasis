@@ -9,6 +9,7 @@ twig:
     etablissementVille: '%env(ETABLISSEMENT_VILLE)%'
     etablissementAdresseRue: '%env(ETABLISSEMENT_ADRESSE_RUE)%'
     etablissementAdressePostale: '%env(ETABLISSEMENT_ADRESSE_POSTALE)%'
+    afficherServiceReferent: '%env(bool:AFFICHER_SERVICE_REFERENT)%'
   paths:
     '%kernel.project_dir%/public/css': 'styles'
 
