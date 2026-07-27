@@ -20,6 +20,7 @@ use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Sensiolabs\GotenbergBundle\Enumeration\PaperSize;
 use Sensiolabs\GotenbergBundle\GotenbergPdfInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 
@@ -31,8 +32,26 @@ class PdfEncoder implements EncoderInterface
         private readonly GotenbergPdfInterface $pdf,
         private readonly LoggerInterface $logger,
         KernelInterface $appKernel,
+        #[Autowire('%env(LOGO_DECISION_FILENAME)%')]
+        private readonly string $logoDecisionFilename = 'logo_ub.svg',
+        #[Autowire('%env(TRIANGLE_DECISION_FILENAME)%')]
+        private readonly string $triangleDecisionFilename = 'triangle-ub.svg',
     ) {
         $this->projectRoot = $appKernel->getProjectDir();
+    }
+
+    /**
+     * Résout un asset d'images de décision, avec repli sur l'asset upstream
+     * si le fichier configuré (personnalisation établissement) est absent.
+     */
+    private function imageAsset(string $filename, string $fallback): string
+    {
+        $path = $this->projectRoot . '/public/images/' . $filename;
+        if (!is_file($path)) {
+            $path = $this->projectRoot . '/public/images/' . $fallback;
+        }
+
+        return base64_encode(file_get_contents($path));
     }
 
     public function encode(mixed $data, string $format, array $context = []): string
@@ -59,10 +78,8 @@ class PdfEncoder implements EncoderInterface
         };
 
         if ($data[0] instanceof DecisionAmenagementExamens) {
-            $data['triangle_base64'] = base64_encode(file_get_contents($this->projectRoot
-            . '/public/images/triangle-ub.svg'));
-            $data['logo_base64'] = base64_encode(file_get_contents($this->projectRoot
-            . '/public/images/logo_ub.svg'));
+            $data['triangle_base64'] = $this->imageAsset($this->triangleDecisionFilename, 'triangle-ub.svg');
+            $data['logo_base64'] = $this->imageAsset($this->logoDecisionFilename, 'logo_ub.svg');
         }
 
         if ($data[0] instanceof ServicesFaits) {

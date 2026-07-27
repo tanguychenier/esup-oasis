@@ -4,6 +4,11 @@ twig:
     publicRootDir: '%kernel.project_dir%/public'
     frontUrl: '%env(FRONT_URL)%'
     backUrl: '%env(BACK_URL)%'
+    etablissementNom: '%env(ETABLISSEMENT_NOM)%'
+    serviceNom: '%env(SERVICE_NOM)%'
+    etablissementVille: '%env(ETABLISSEMENT_VILLE)%'
+    etablissementAdresseRue: '%env(ETABLISSEMENT_ADRESSE_RUE)%'
+    etablissementAdressePostale: '%env(ETABLISSEMENT_ADRESSE_POSTALE)%'
   paths:
     '%kernel.project_dir%/public/css': 'styles'
 

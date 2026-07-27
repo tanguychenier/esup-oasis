@@ -239,6 +239,32 @@ final class PaehTemplateTest extends TestCase
         self::assertStringNotContainsString('N° étudiant', $html);
     }
 
+    public function testEstablishmentBrandingIsConfigurableAndFallsBackToUpstreamDefaults(): void
+    {
+        // Sans globals fournis, le template retombe sur les valeurs upstream.
+        $default = $this->renderWith(etudes: [], aidesHumaines: [], examens: []);
+        self::assertStringContainsString('Université de Bordeaux', $default);
+        self::assertStringContainsString('Service PHASE', $default);
+        self::assertStringContainsString('Talence, le', $default);
+
+        // Avec les globals établissement, le branding est entièrement surchargé.
+        $custom = $this->renderWith(
+            etudes: [],
+            aidesHumaines: [],
+            examens: [],
+            branding: [
+                'etablissementNom' => 'Université Paris-Saclay',
+                'serviceNom' => 'Service Accompagnement Étudiants',
+                'etablissementVille' => 'Orsay',
+            ],
+        );
+        self::assertStringContainsString('Université Paris-Saclay', $custom);
+        self::assertStringContainsString('Service Accompagnement Étudiants', $custom);
+        self::assertStringContainsString('Orsay, le', $custom);
+        self::assertStringNotContainsString('Université de Bordeaux', $custom);
+        self::assertStringNotContainsString('Service PHASE', $custom);
+    }
+
     /**
      * @param list<Amenagement> $etudes
      * @param list<Amenagement> $aidesHumaines
@@ -252,6 +278,7 @@ final class PaehTemplateTest extends TestCase
         ?\DateTimeInterface $dateNaissance = null,
         int|string|null $numeroEtudiant = null,
         ?\DateTimeInterface $dateAvisMedecin = null,
+        array $branding = [],
     ): string {
         $etudiant = (new Utilisateur())
             ->setNom('DOE')
@@ -305,6 +332,7 @@ final class PaehTemplateTest extends TestCase
             'data' => $data,
             'backUrl' => 'http://localhost',
             'app' => $appStub,
+            ...$branding,
         ]);
     }
 
