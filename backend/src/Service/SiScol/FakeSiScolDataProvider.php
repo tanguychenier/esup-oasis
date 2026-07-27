@@ -31,7 +31,7 @@ class FakeSiScolDataProvider extends AbstractSiScolDataProvider
 
     /**
      * Adresse simulée, surchargeable depuis les tests pour exercer la
-     * projection OBC-1 de l'adresse Apogée vers Utilisateur::adresse.
+     * projection de l'adresse Apogée vers Utilisateur::adresse.
      * Valeurs par défaut : pas d'adresse connue.
      */
     public static ?string $adresseLigne1 = null;

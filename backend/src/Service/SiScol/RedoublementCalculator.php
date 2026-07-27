@@ -10,7 +10,7 @@
 namespace App\Service\SiScol;
 
 /**
- * OBC-3 — détermination du redoublement à partir du compteur natif
+ * Détermination du redoublement à partir du compteur natif
  * Apogée `nbr_ins_etp` (nombre d'inscriptions administratives à l'étape).
  *
  * Règle officielle V1 (Robin Kaczala, CdP OASIS, 23/06/2026) : un

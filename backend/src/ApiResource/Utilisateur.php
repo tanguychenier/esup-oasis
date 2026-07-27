@@ -567,7 +567,7 @@ final class Utilisateur
     }
 
     /**
-     * OBC-1 critère 2 — code situation sociale Apogée (lecture seule).
+     * Code situation sociale Apogée (lecture seule).
      */
     #[Groups([self::GROUP_OUT])]
     #[ApiProperty(
@@ -584,7 +584,7 @@ final class Utilisateur
     }
 
     /**
-     * OBC-1 critère 2 — libellé situation sociale Apogée (lecture seule).
+     * Libellé situation sociale Apogée (lecture seule).
      */
     #[Groups([self::GROUP_OUT])]
     #[ApiProperty(

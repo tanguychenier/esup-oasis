@@ -10,7 +10,7 @@
 namespace App\Service\SiScol;
 
 /**
- * OBC-3 — extraction du niveau d'études (L1/L2/L3/M1/M2/D1/D2/D3) à
+ * Extraction du niveau d'études (L1/L2/L3/M1/M2/D1/D2/D3) à
  * partir du code étape Apogée. Le code Apogée encode généralement le
  * niveau en préfixe : L1INFO, L2MATHS, M1ARTS, M2POLI, D1PHYS, etc.
  *

@@ -220,7 +220,7 @@ class Utilisateur implements UserInterface
     #[Map(if: false)]
     private ?bool $boursier = null;
 
-    // OBC-1 critère 2 — situation sociale Apogée (cod_soc / lib_soc).
+    // Situation sociale Apogée (cod_soc / lib_soc).
     #[ORM\Column(length: 10, nullable: true)]
     #[Map(if: false)]
     private ?string $codeSituationSociale = null;
