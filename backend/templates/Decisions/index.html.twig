@@ -32,8 +32,10 @@
             text-align: center;
             font-size: 13pt;
             font-weight: bold;
-            color: #222222;
-            margin: 0 auto 12px auto;
+            color: #ffffff;
+            background-color: #000000;
+            padding: 6px 10px;
+            margin: 0 auto 10px auto;
             line-height: 1.3em;
         }
 
@@ -50,6 +52,10 @@
         }
 
         .paeh-header .annee {
+            font-weight: bold;
+        }
+
+        .paeh-header .version {
             font-weight: bold;
         }
 
@@ -279,10 +285,13 @@
     <main>
         <div class="paeh-header">
             <span class="annee">Année universitaire {{ data.annee }}-{{ data.annee + 1 }}</span>
-            {% if composanteActive is not null %}
-                <span class="composante">{{ composanteActive.libelle|default(composanteActive) }}</span>
-            {% endif %}
+            <span class="version">Version : Notification initiale</span>
         </div>
+        {% if composanteActive is not null %}
+            <div class="paeh-header">
+                <span class="composante">Composante : {{ composanteActive.libelle|default(composanteActive) }}</span>
+            </div>
+        {% endif %}
 
         <section class="visa-block">
             <p>Vu la loi n° 2005-102 du 11 février 2005 pour l'égalité des droits et des chances,
@@ -310,6 +319,7 @@
         {% set examens = data.amenagementsParCategorie.examens %}
         {% set total = etudes|length + aidesHumaines|length + examens|length %}
 
+        <h2 class="categorie-titre" style="border-bottom: 1px solid #999999; padding-bottom: 2px;">Aménagements actifs pour l'année</h2>
         <div class="amenagements">
             {% if etudes|length > 0 %}
                 <h3 class="categorie-titre">Aménagements d'études</h3>

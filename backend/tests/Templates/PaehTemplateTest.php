@@ -113,6 +113,10 @@ final class PaehTemplateTest extends TestCase
             "Notification de Plan d'accompagnement de l'étudiant en situation de handicap (PAEH)",
             $html,
         );
+
+        // Alignement maquette : ligne Version et intitulé global des aménagements.
+        self::assertStringContainsString('Version : Notification initiale', $html);
+        self::assertStringContainsString("Aménagements actifs pour l'année", $html);
     }
 
     public function testTemplateRemovesOldIntroAndAnnouncementSentences(): void
