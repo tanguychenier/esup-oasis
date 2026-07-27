@@ -13,6 +13,8 @@
 namespace App\Entity;
 
 use App\Repository\InscriptionRepository;
+use App\Service\SiScol\NiveauExtractor;
+use App\Service\SiScol\NiveauResolver;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
@@ -211,5 +213,17 @@ class Inscription
         $this->anneeDansDiplome = $anneeDansDiplome;
 
         return $this;
+    }
+
+    /**
+     * Niveau d'études LMD (L1..M2 / D1-D3) dérivé à la volée, jamais persisté :
+     * en priorité via le cycle du diplôme + l'année dans le diplôme (données
+     * Apogée nationales), avec repli sur le préfixe du code étape. null quand
+     * le niveau n'est pas applicable. Alimente notamment l'affichage du PAEH.
+     */
+    public function getNiveau(): ?string
+    {
+        return (new NiveauResolver())->resolve($this->cycle, $this->anneeDansDiplome)
+            ?? (new NiveauExtractor())->extract($this->codeEtape);
     }
 }
