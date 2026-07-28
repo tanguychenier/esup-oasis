@@ -38,6 +38,57 @@ class UtilisateurManagerTest extends ApiTestCaseCustom
         $this->assertContains('admin', $uids);
     }
 
+    public function testParUidCreeUtilisateurAvecLesChampsAnnuaireLdap(): void
+    {
+        // Un uid absent en base est créé à partir de l'annuaire (LDAP) : c'est le même
+        // chemin que la connexion et que l'import de reprise (qui appelle parUid via l'API).
+        $container = static::getContainer();
+
+        $ldap = new class extends LdapService {
+            public function __construct()
+            {
+            }
+
+            public function searchUid(string $uid, array $attributes = []): array
+            {
+                return [[
+                    'uid' => [$uid],
+                    'sn' => ['Dupont'],
+                    'givenname' => ['Marie'],
+                    'mail' => [$uid . '@univ-paris-saclay.fr'],
+                    'supannetuid' => ['21800999'],
+                    'count' => 1,
+                ]];
+            }
+
+            public function isConnected(): bool
+            {
+                return true;
+            }
+
+            public function checkLdapConnection(): bool
+            {
+                return true;
+            }
+
+            public function connectAndBind(): void
+            {
+            }
+        };
+        $container->set(LdapService::class, $ldap);
+
+        /** @var UtilisateurManager $manager */
+        $manager = $container->get(UtilisateurManager::class);
+
+        $user = $manager->parUid('e888888', true);
+
+        self::assertSame('e888888', $user->getUid());
+        self::assertSame('Dupont', $user->getNom());
+        self::assertSame('Marie', $user->getPrenom());
+        self::assertSame('e888888@univ-paris-saclay.fr', $user->getEmail());
+        self::assertNotNull($user->getId());
+    }
+
     public function testMajInscriptionsProjetteSituationSociale(): void
     {
         // OBC-1 critère 2 — la projection situation sociale est alimentée par le
