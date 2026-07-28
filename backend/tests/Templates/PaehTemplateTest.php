@@ -103,7 +103,11 @@ final class PaehTemplateTest extends TestCase
         self::assertStringContainsString('Vu le décret n° 2013-756 du 19 août 2013', $html);
         self::assertStringContainsString('Vu la circulaire du 6 février 2023', $html);
         self::assertStringContainsString('Vu la circulaire du 10 juillet 2024', $html);
-        self::assertStringContainsString('Vu l\'avis du médecin', $html);
+        self::assertStringContainsString(
+            'Vu l\'avis rendu par le médecin du service universitaire de médecine préventive',
+            $html,
+        );
+        self::assertStringContainsString('désigné par la CDAPH', $html);
     }
 
     public function testTemplateRendersTheTitleAndHeaderLines(): void
