@@ -29,7 +29,6 @@ final class PaehTemplateTest extends TestCase
             examens: [$this->amenagement('Tiers-temps aux examens', examens: true)],
         );
 
-        // Sous-titres alignés sur la maquette (gris, suffixés « : »).
         self::assertStringContainsString('Aménagements des études :', $html);
         self::assertStringContainsString('Aides humaines :', $html);
         self::assertStringContainsString('Aménagements des examens :', $html);
@@ -71,7 +70,6 @@ final class PaehTemplateTest extends TestCase
             examens: [],
         );
 
-        // Formulation validée par le service handicap (retour métier 2026-07-27).
         self::assertStringContainsString('Le bénéfice des aménagements vous est accordé', $html);
         self::assertStringContainsString(
             "En cas de nécessité, vos besoins pourront faire l'objet d'une nouvelle évaluation.",
@@ -81,7 +79,6 @@ final class PaehTemplateTest extends TestCase
             'un entretien avec le service handicap de votre composante',
             $html,
         );
-        // La formule de politesse générique a été retirée pour coller à la maquette.
         self::assertStringNotContainsString('Je vous prie de croire', $html);
     }
 
@@ -96,10 +93,7 @@ final class PaehTemplateTest extends TestCase
         self::assertStringContainsString('<section class="visa-block">', $html);
         self::assertStringContainsString('Vu la loi n° 2005-102 du 11 février 2005', $html);
         self::assertStringContainsString('Vu la loi n° 2013-660 du 22 juillet 2013', $html);
-        self::assertStringContainsString(
-            'Vu les articles D. 613-26 à D. 613-28 du code de l\'éducation relatifs aux aménagements',
-            $html,
-        );
+        self::assertStringNotContainsString('Vu les articles D. 613-26', $html);
         self::assertStringContainsString('Vu le décret n° 2013-756 du 19 août 2013', $html);
         self::assertStringContainsString('Vu la circulaire du 6 février 2023', $html);
         self::assertStringContainsString('Vu la circulaire du 10 juillet 2024', $html);
@@ -118,7 +112,6 @@ final class PaehTemplateTest extends TestCase
             examens: [],
         );
 
-        // Titre inclusif conservé (ne suit pas la formulation « Handicapé » de la maquette).
         self::assertStringContainsString('class="paeh-titre"', $html);
         self::assertStringContainsString(
             "Notification de Plan d'accompagnement de l'étudiant en situation de handicap (PAEH)",
@@ -127,7 +120,6 @@ final class PaehTemplateTest extends TestCase
 
         self::assertStringContainsString('Année universitaire : 2026-2027', $html);
         self::assertStringContainsString('Version : Notification initiale', $html);
-        // Intitulé global des aménagements en titre de section (filet, pas de soulignement).
         self::assertStringContainsString("Aménagements actifs pour l'année", $html);
         self::assertStringContainsString('class="section-titre"', $html);
     }
@@ -235,7 +227,7 @@ final class PaehTemplateTest extends TestCase
             numeroEtudiant: '21800123',
         );
 
-        // Bloc « Destinataire : » en section (2 colonnes) conforme à la maquette.
+        // Le destinataire est rendu en section sur deux colonnes.
         self::assertStringContainsString('Destinataire :', $html);
         self::assertStringContainsString('class="destinataire-grid"', $html);
         self::assertStringContainsString('Nom : DOE', $html);
@@ -260,7 +252,7 @@ final class PaehTemplateTest extends TestCase
 
     public function testServiceReferentBlockIsHiddenByDefaultAndShownWhenEnabled(): void
     {
-        // Par défaut le service handicap a validé le document sans l'encart « dossier suivi par ».
+        // Par défaut, l'encart « dossier suivi par » n'est pas rendu.
         $default = $this->renderWith(etudes: [], aidesHumaines: [], examens: []);
         self::assertStringNotContainsString('Dossier suivi par', $default);
         self::assertStringNotContainsString('Service PHASE', $default);
@@ -307,8 +299,24 @@ final class PaehTemplateTest extends TestCase
             examens: [],
         );
 
-        // Tous les PAEH sont signés numériquement : la mention doit rester (retour métier).
+        // La mention de signature numérique figure toujours dans le cadre de signature.
         self::assertStringContainsString('Signé numériquement le', $html);
+    }
+
+    public function testSignatureBoxDoesNotRenderAScannedSignatureImage(): void
+    {
+        // Le signataire est nommé et signé numériquement : aucune image manuscrite d'un tiers
+        // ne doit apparaître dans le cadre.
+        $html = $this->renderWith(
+            etudes: [$this->amenagement('Tiers-temps en cours', pedagogique: true)],
+            aidesHumaines: [],
+            examens: [],
+            signatureContents: base64_encode('FAKE-SIGNATURE-BYTES'),
+        );
+
+        self::assertStringContainsString('Signé numériquement le', $html);
+        self::assertStringNotContainsString('<img src="data:image/png', $html);
+        self::assertStringNotContainsString(base64_encode('FAKE-SIGNATURE-BYTES'), $html);
     }
 
     /**
@@ -325,6 +333,7 @@ final class PaehTemplateTest extends TestCase
         int|string|null $numeroEtudiant = null,
         ?\DateTimeInterface $dateAvisMedecin = null,
         array $branding = [],
+        ?string $signatureContents = null,
     ): string {
         $etudiant = (new Utilisateur())
             ->setNom('DOE')
@@ -365,7 +374,10 @@ final class PaehTemplateTest extends TestCase
             'responsable_phase' => [
                 'qualite' => 'Le responsable',
                 'nom' => 'R. NOMME',
-                'signature' => ['contents' => null, 'mimeType' => null],
+                'signature' => [
+                    'contents' => $signatureContents,
+                    'mimeType' => $signatureContents !== null ? 'image/png' : null,
+                ],
             ],
         ];
 
