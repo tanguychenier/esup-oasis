@@ -278,10 +278,12 @@ final class PaehTemplateTest extends TestCase
         self::assertStringContainsString('Alice Dupont', $withReferent);
     }
 
-    public function testFaitALineUsesConfiguredCityAndFallsBackToUpstreamDefault(): void
+    public function testFaitALineUsesConfiguredCityWithoutDate(): void
     {
+        // La date n'est plus sur la ligne « Fait à … » : elle figure dans le cadre de signature.
         $default = $this->renderWith(etudes: [], aidesHumaines: [], examens: []);
-        self::assertStringContainsString('Fait à Talence, le', $default);
+        self::assertStringContainsString('Fait à Talence', $default);
+        self::assertStringNotContainsString('Fait à Talence, le', $default);
 
         $custom = $this->renderWith(
             etudes: [],
@@ -289,8 +291,20 @@ final class PaehTemplateTest extends TestCase
             examens: [],
             branding: ['etablissementVille' => 'Orsay'],
         );
-        self::assertStringContainsString('Fait à Orsay, le', $custom);
+        self::assertStringContainsString('Fait à Orsay', $custom);
         self::assertStringNotContainsString('Fait à Talence', $custom);
+    }
+
+    public function testSignatureBlockKeepsTheDigitalSignatureMention(): void
+    {
+        $html = $this->renderWith(
+            etudes: [$this->amenagement('Tiers-temps en cours', pedagogique: true)],
+            aidesHumaines: [],
+            examens: [],
+        );
+
+        // Tous les PAEH sont signés numériquement : la mention doit rester (retour métier).
+        self::assertStringContainsString('Signé numériquement le', $html);
     }
 
     /**

@@ -315,7 +315,7 @@
         {% if composanteActive is not null %}
             <p class="entete-composante">Composante de l'{{ etablissementNom|default('Université de Bordeaux') }} : {{ composanteActive.libelle|default(composanteActive) }}</p>
         {% endif %}
-        <p class="entete-lieu">Fait à {{ etablissementVille|default('Talence') }}, le {{ "now"|date("d/m/Y") }}</p>
+        <p class="entete-lieu">Fait à {{ etablissementVille|default('Talence') }}</p>
 
         <section class="visa-block">
             <p>Vu la loi n° 2005-102 du 11 février 2005 pour l'égalité des droits et des chances,
@@ -428,6 +428,7 @@
                         <br/><img src="data:{{ data.responsable_phase.signature.mimeType }};base64, {{ data.responsable_phase.signature.contents }}"
                                   alt="signature"/>
                     {% endif %}
+                    <br/>Signé numériquement le {{ data.dateSignature|default("now")|date("d/m/Y") }}
                 </p>
             </div>
         </div>
