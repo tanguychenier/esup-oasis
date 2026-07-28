@@ -6,9 +6,14 @@ namespace App\Tests\Serializer;
 
 use App\ApiResource\DecisionAmenagementExamens as DecisionAmenagementExamensResource;
 use App\Entity\Amenagement;
+use App\Entity\Composante;
 use App\Entity\DecisionAmenagementExamens;
+use App\Entity\Formation;
+use App\Entity\Inscription;
+use App\Entity\Parametre;
 use App\Entity\TypeAmenagement;
 use App\Entity\Utilisateur;
+use App\Entity\ValeurParametre;
 use App\Repository\ParametreRepository;
 use App\Serializer\DecisionAmenagementEditionNormalizer;
 use App\Service\FileStorage\StorageProviderInterface;
@@ -237,6 +242,98 @@ final class DecisionAmenagementEditionNormalizerTest extends TestCase
         self::assertSame([], $groupes['etudes']);
         self::assertSame([], $groupes['aidesHumaines']);
         self::assertSame([], $groupes['examens']);
+    }
+
+    public function testSignataireIsResolvedFromComposanteWhenAComposanteSpecificParameterExists(): void
+    {
+        $entity = $this->decisionPourComposante('CODE_C_1');
+
+        $manager = $this->createStub(DecisionAmenagementManager::class);
+        $manager->method('parUidEtAnnee')->willReturn($entity);
+
+        $parametreRepository = $this->createStub(ParametreRepository::class);
+        $parametreRepository->method('findOneBy')->willReturnCallback(fn(array $criteria) => match ($criteria['cle']) {
+            'PRESIDENT_QUALITE_CODE_C_1' => $this->parametreStub("La Doyenne de l'UFR Sciences"),
+            'PRESIDENT_NOM_CODE_C_1' => $this->parametreStub('Marie Curie'),
+            'PRESIDENT_QUALITE' => $this->parametreStub('Le Président'),
+            'PRESIDENT_NOM' => $this->parametreStub('Nom Global'),
+            Parametre::SIGNATURE_DECISIONS => new Parametre(),
+            default => null,
+        });
+
+        $normalizer = new DecisionAmenagementEditionNormalizer(
+            $manager,
+            $this->createStub(StorageProviderInterface::class),
+            $parametreRepository,
+        );
+        $normalizer->setClock(new MockClock(new DateTimeImmutable('2026-06-25 12:00:00')));
+
+        $data = $normalizer->normalize(new DecisionAmenagementExamensResource($entity), 'pdf');
+
+        self::assertSame("La Doyenne de l'UFR Sciences", $data['president']['qualite']);
+        self::assertSame('Marie Curie', $data['president']['nom']);
+    }
+
+    public function testSignataireFallsBackToGlobalParameterWhenComposanteHasNoSpecificOne(): void
+    {
+        $entity = $this->decisionPourComposante('CODE_C_1');
+
+        $manager = $this->createStub(DecisionAmenagementManager::class);
+        $manager->method('parUidEtAnnee')->willReturn($entity);
+
+        $parametreRepository = $this->createStub(ParametreRepository::class);
+        // Pas de paramètre propre à la composante : la valeur globale de l'établissement s'applique.
+        $parametreRepository->method('findOneBy')->willReturnCallback(fn(array $criteria) => match ($criteria['cle']) {
+            'PRESIDENT_QUALITE' => $this->parametreStub('Le Président'),
+            'PRESIDENT_NOM' => $this->parametreStub('Nom Global'),
+            Parametre::SIGNATURE_DECISIONS => new Parametre(),
+            default => null,
+        });
+
+        $normalizer = new DecisionAmenagementEditionNormalizer(
+            $manager,
+            $this->createStub(StorageProviderInterface::class),
+            $parametreRepository,
+        );
+        $normalizer->setClock(new MockClock(new DateTimeImmutable('2026-06-25 12:00:00')));
+
+        $data = $normalizer->normalize(new DecisionAmenagementExamensResource($entity), 'pdf');
+
+        self::assertSame('Le Président', $data['president']['qualite']);
+        self::assertSame('Nom Global', $data['president']['nom']);
+    }
+
+    private function decisionPourComposante(string $codeComposante): DecisionAmenagementExamens
+    {
+        $composante = (new Composante())->setLibelle('UFR Sciences')->setCodeExterne($codeComposante);
+        $formation = (new Formation())->setLibelle('Master')->setCodeExterne('F1')->setComposante($composante);
+        $inscription = (new Inscription())
+            ->setFormation($formation)
+            ->setDebut(new DateTimeImmutable('2026-06-01'))
+            ->setFin(new DateTimeImmutable('2027-05-31'));
+
+        $beneficiaire = new Utilisateur();
+        $beneficiaire->setUid('benef-uid');
+        $beneficiaire->setClock(new MockClock(new DateTimeImmutable('2026-06-25 12:00:00')));
+        $beneficiaire->addInscription($inscription);
+
+        $entity = new DecisionAmenagementExamens();
+        $entity->setBeneficiaire($beneficiaire);
+        $entity->setDebut(new DateTimeImmutable('2026-09-01'));
+        $entity->setFin(new DateTimeImmutable('2027-08-31'));
+
+        return $entity;
+    }
+
+    private function parametreStub(string $valeur): Parametre
+    {
+        $valeurParametre = $this->createStub(ValeurParametre::class);
+        $valeurParametre->method('getValeur')->willReturn($valeur);
+
+        $parametre = $this->createStub(Parametre::class);
+        $parametre->method('getValeurCourante')->willReturn($valeurParametre);
+
+        return $parametre;
     }
 
     private function makeAmenagement(

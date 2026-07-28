@@ -13,7 +13,9 @@
 namespace App\Serializer;
 
 use App\ApiResource\DecisionAmenagementExamens;
+use App\Entity\Composante;
 use App\Entity\Parametre;
+use App\Entity\Utilisateur;
 use App\Repository\ParametreRepository;
 use App\Service\FileStorage\StorageProviderInterface;
 use App\State\DecisionAmenagementExamens\DecisionAmenagementManager;
@@ -53,18 +55,9 @@ readonly class DecisionAmenagementEditionNormalizer implements NormalizerInterfa
         $data['dateAvisMedecin'] = $entity->getDateAvisMedecin();
 
         $data['annee'] = $this->anneeDuJour($this->now());
-        $data['president']['qualite'] = $this->parametreRepository
-            ->findOneBy([
-                'cle' => 'PRESIDENT_QUALITE',
-            ])
-            ?->getValeurCourante()
-            ->getValeur();
-        $data['president']['nom'] = $this->parametreRepository
-            ->findOneBy([
-                'cle' => 'PRESIDENT_NOM',
-            ])
-            ?->getValeurCourante()
-            ->getValeur();
+        $codeComposante = $this->composanteBeneficiaire($entity->getBeneficiaire())?->getCodeExterne();
+        $data['president']['qualite'] = $this->parametreSignataire('PRESIDENT_QUALITE', $codeComposante);
+        $data['president']['nom'] = $this->parametreSignataire('PRESIDENT_NOM', $codeComposante);
         $data['responsable_phase']['qualite'] = $this->parametreRepository
             ->findOneBy([
                 'cle' => 'RESPONSABLE_PHASE_QUALITE',
@@ -100,6 +93,49 @@ readonly class DecisionAmenagementEditionNormalizer implements NormalizerInterfa
         $data['responsable_phase']['signature']['mimeType'] = $fichier?->getTypeMime();
 
         return $data;
+    }
+
+    /**
+     * Valeur d'un paramètre signataire, spécifique à la composante lorsqu'un paramètre
+     * suffixé par son code externe existe, avec repli sur la valeur globale de l'établissement.
+     */
+    private function parametreSignataire(string $cle, ?string $codeComposante): ?string
+    {
+        if ($codeComposante !== null && $codeComposante !== '') {
+            $valeurComposante = $this->valeurParametre($cle . '_' . $codeComposante);
+            if ($valeurComposante !== null && $valeurComposante !== '') {
+                return $valeurComposante;
+            }
+        }
+
+        return $this->valeurParametre($cle);
+    }
+
+    private function valeurParametre(string $cle): ?string
+    {
+        return $this->parametreRepository
+            ->findOneBy(['cle' => $cle])
+            ?->getValeurCourante()
+            ?->getValeur();
+    }
+
+    /**
+     * Composante de l'inscription en cours du bénéficiaire, ou null s'il n'en a aucune.
+     */
+    private function composanteBeneficiaire(?Utilisateur $beneficiaire): ?Composante
+    {
+        if ($beneficiaire === null) {
+            return null;
+        }
+
+        foreach ($beneficiaire->getInscriptionsEnCours() as $inscription) {
+            $composante = $inscription->getFormation()?->getComposante();
+            if ($composante !== null) {
+                return $composante;
+            }
+        }
+
+        return null;
     }
 
     public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
