@@ -14,13 +14,10 @@ namespace App\Serializer;
 
 use App\ApiResource\DecisionAmenagementExamens;
 use App\Entity\Composante;
-use App\Entity\Parametre;
 use App\Entity\Utilisateur;
 use App\Repository\ParametreRepository;
-use App\Service\FileStorage\StorageProviderInterface;
 use App\State\DecisionAmenagementExamens\DecisionAmenagementManager;
 use App\Util\AnneeUniversitaireAwareTrait;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 readonly class DecisionAmenagementEditionNormalizer implements NormalizerInterface
@@ -29,7 +26,6 @@ readonly class DecisionAmenagementEditionNormalizer implements NormalizerInterfa
 
     public function __construct(
         private DecisionAmenagementManager $decisionAmenagementManager,
-        private StorageProviderInterface $storageProvider,
         private ParametreRepository $parametreRepository,
     ) {}
 
@@ -58,39 +54,6 @@ readonly class DecisionAmenagementEditionNormalizer implements NormalizerInterfa
         $codeComposante = $this->composanteBeneficiaire($entity->getBeneficiaire())?->getCodeExterne();
         $data['president']['qualite'] = $this->parametreSignataire('PRESIDENT_QUALITE', $codeComposante);
         $data['president']['nom'] = $this->parametreSignataire('PRESIDENT_NOM', $codeComposante);
-        $data['responsable_phase']['qualite'] = $this->parametreRepository
-            ->findOneBy([
-                'cle' => 'RESPONSABLE_PHASE_QUALITE',
-            ])
-            ?->getValeurCourante()
-            ->getValeur();
-        $data['responsable_phase']['nom'] = $this->parametreRepository
-            ->findOneBy([
-                'cle' => 'RESPONSABLE_PHASE_NOM',
-            ])
-            ?->getValeurCourante()
-            ->getValeur();
-
-        /**
-         * Signature stockée en paramètre
-         */
-        $fichier = $this->parametreRepository
-            ->findOneBy([
-                'cle' => Parametre::SIGNATURE_DECISIONS,
-            ])
-            ->getValeurCourante()
-            ?->getFichier();
-
-        if ($fichier !== null) {
-            $file = $this->storageProvider->get($fichier->getMetadata());
-            if ($file instanceof File) {
-                $file = $file->getContent();
-            }
-            $file = base64_encode($file);
-        }
-
-        $data['responsable_phase']['signature']['contents'] = $file ?? null;
-        $data['responsable_phase']['signature']['mimeType'] = $fichier?->getTypeMime();
 
         return $data;
     }

@@ -16,7 +16,6 @@ use App\Entity\Utilisateur;
 use App\Entity\ValeurParametre;
 use App\Repository\ParametreRepository;
 use App\Serializer\DecisionAmenagementEditionNormalizer;
-use App\Service\FileStorage\StorageProviderInterface;
 use App\State\DecisionAmenagementExamens\DecisionAmenagementManager;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
@@ -29,9 +28,7 @@ final class DecisionAmenagementEditionNormalizerTest extends TestCase
     protected function setUp(): void
     {
         $this->normalizer = new DecisionAmenagementEditionNormalizer(
-            $this->createStub(DecisionAmenagementManager::class),
-            $this->createStub(StorageProviderInterface::class),
-            $this->createStub(ParametreRepository::class),
+            $this->createStub(DecisionAmenagementManager::class),            $this->createStub(ParametreRepository::class),
         );
     }
 
@@ -59,9 +56,7 @@ final class DecisionAmenagementEditionNormalizerTest extends TestCase
         );
 
         $normalizer = new DecisionAmenagementEditionNormalizer(
-            $manager,
-            $this->createStub(StorageProviderInterface::class),
-            $parametreRepository,
+            $manager,            $parametreRepository,
         );
         $normalizer->setClock(new MockClock(new DateTimeImmutable('2026-06-25 12:00:00')));
 
@@ -97,9 +92,7 @@ final class DecisionAmenagementEditionNormalizerTest extends TestCase
         );
 
         $normalizer = new DecisionAmenagementEditionNormalizer(
-            $manager,
-            $this->createStub(StorageProviderInterface::class),
-            $parametreRepository,
+            $manager,            $parametreRepository,
         );
         $normalizer->setClock(new MockClock(new DateTimeImmutable('2026-06-25 12:00:00')));
 
@@ -135,9 +128,7 @@ final class DecisionAmenagementEditionNormalizerTest extends TestCase
         );
 
         $normalizer = new DecisionAmenagementEditionNormalizer(
-            $manager,
-            $this->createStub(StorageProviderInterface::class),
-            $parametreRepository,
+            $manager,            $parametreRepository,
         );
         $normalizer->setClock(new MockClock(new DateTimeImmutable('2026-06-25 12:00:00')));
 
@@ -172,9 +163,7 @@ final class DecisionAmenagementEditionNormalizerTest extends TestCase
         );
 
         $normalizer = new DecisionAmenagementEditionNormalizer(
-            $manager,
-            $this->createStub(StorageProviderInterface::class),
-            $parametreRepository,
+            $manager,            $parametreRepository,
         );
         $normalizer->setClock(new MockClock(new DateTimeImmutable('2026-06-25 12:00:00')));
 
@@ -262,9 +251,7 @@ final class DecisionAmenagementEditionNormalizerTest extends TestCase
         });
 
         $normalizer = new DecisionAmenagementEditionNormalizer(
-            $manager,
-            $this->createStub(StorageProviderInterface::class),
-            $parametreRepository,
+            $manager,            $parametreRepository,
         );
         $normalizer->setClock(new MockClock(new DateTimeImmutable('2026-06-25 12:00:00')));
 
@@ -291,9 +278,7 @@ final class DecisionAmenagementEditionNormalizerTest extends TestCase
         });
 
         $normalizer = new DecisionAmenagementEditionNormalizer(
-            $manager,
-            $this->createStub(StorageProviderInterface::class),
-            $parametreRepository,
+            $manager,            $parametreRepository,
         );
         $normalizer->setClock(new MockClock(new DateTimeImmutable('2026-06-25 12:00:00')));
 
