@@ -12,6 +12,7 @@ import { E2E_BASE_URL, E2E_IS_CI, E2E_SLOW_MO } from "./tests/e2e/env";
  */
 export default defineConfig({
    testDir: "./tests/e2e",
+   globalSetup: "./tests/e2e/global-setup.ts",
    outputDir: "./test-results",
    // Ces tests partagent une meme base de donnees et modifient l'etat du dossier
    // (observations, date d'avis medical, amenagements). Ils doivent donc se

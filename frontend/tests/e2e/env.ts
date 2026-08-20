@@ -7,11 +7,11 @@
  * etablissement puisse adapter ports et noms de conteneurs sans toucher au code.
  */
 
-/** URL du frontend. Port par defaut de FRONTEND_PORT dans installation/.env. */
-export const E2E_BASE_URL = process.env.E2E_BASE_URL ?? "http://localhost:8100";
+/** URL du frontend. Defaut de FRONTEND_PORT dans installation/compose.yaml. */
+export const E2E_BASE_URL = process.env.E2E_BASE_URL ?? "http://localhost";
 
-/** URL de l'API. Port par defaut de BACKEND_PORT dans installation/.env. */
-export const E2E_API_URL = process.env.E2E_API_URL ?? "http://localhost:8101";
+/** URL de l'API. Defaut de BACKEND_PORT dans installation/compose.yaml. */
+export const E2E_API_URL = process.env.E2E_API_URL ?? "http://localhost:8000";
 
 /**
  * Nom du conteneur backend, utilise pour generer un jeton de session via la
