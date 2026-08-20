@@ -77,9 +77,9 @@ class ApogeeProvider extends AbstractSiScolDataProvider
                 'debut' => new DateTime($row->COD_ANU . '-09-01'),
                 'fin' => new DateTime(($row->COD_ANU + 1) . '-08-31'),
                 'boursier' => $row->TEM_BRS_IAA == 'O',
-                // situation sociale Apogée (oci renvoie les colonnes en MAJUSCULES).
-                // TODO(apogée-réel) : confirmer le nom exact de colonne cod_soc (vs cod_sco) et les
-                // valeurs réelles du code non-boursier sur l'instance Apogée Saclay.
+                // Situation sociale Apogée (oci renvoie les colonnes en MAJUSCULES).
+                // Le code et son libellé sont repris tels quels : leur signification est
+                // propre à chaque établissement et se paramètre dans la requête.
                 'codeSituationSociale' => isset($row->COD_SOC) ? trim($row->COD_SOC) : null,
                 'libelleSituationSociale' => isset($row->LIB_SOC) ? trim($row->LIB_SOC) : null,
                 'statut' => $row->LIB_RGI, //changement de dernière minute... on colle le régime dans le champ "statut"
@@ -170,7 +170,20 @@ class ApogeeProvider extends AbstractSiScolDataProvider
         oci_bind_by_name($stmt, 'codVrsVet', $codVrsVet);
 
         if (!oci_execute($stmt)) {
-            $this->logger->warning('Récupération des infos formation impossible, apogée indisponible');
+            // Apogée répond mais refuse la requête, typiquement parce qu'elle ne
+            // correspond pas au schéma de l'établissement (table ou colonne absente).
+            // On remonte l'erreur réelle : sans cela, diplôme, discipline et niveau
+            // resteraient vides sur toutes les formations, sans aucun signal.
+            $erreur = oci_error($stmt);
+            $this->logger->error(
+                'Requête formation refusée par Apogée. Diplôme, discipline et niveau resteront '
+                . "vides. Vérifier que la requête correspond au schéma de l'établissement.",
+                [
+                    'code' => $erreur['code'] ?? null,
+                    'message' => $erreur['message'] ?? 'inconnue',
+                ],
+            );
+
             return [];
         }
 
