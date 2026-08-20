@@ -161,17 +161,32 @@ final class PaehTemplateTest extends TestCase
         self::assertStringContainsString('________', $html);
     }
 
-    public function testTemplateRendersVersaillesAdministrativeCourtRecourseBlock(): void
+    public function testRecourseBlockJurisdictionIsConfigurable(): void
     {
-        $html = $this->renderWith(
+        // Sans surcharge, la juridiction retombe sur la valeur upstream.
+        $default = $this->renderWith(
             etudes: [],
             aidesHumaines: [],
             examens: [$this->amenagement('Tiers-temps aux examens', examens: true)],
         );
 
-        self::assertStringContainsString('Voies et délais de recours', $html);
-        self::assertStringContainsString('Tribunal administratif', $html);
-        self::assertStringContainsString('Versailles', $html);
+        self::assertStringContainsString('Voies et délais de recours', $default);
+        self::assertStringContainsString('Tribunal administratif', $default);
+        self::assertStringContainsString('Bordeaux', $default);
+
+        // Chaque etablissement declare la juridiction dont il depend.
+        $custom = $this->renderWith(
+            etudes: [],
+            aidesHumaines: [],
+            examens: [$this->amenagement('Tiers-temps aux examens', examens: true)],
+            branding: [
+                'tribunalAdministratifVille' => 'Versailles',
+                'tribunalAdministratifAdresse' => '56 avenue de Saint-Cloud, 78000 Versailles',
+            ],
+        );
+
+        self::assertStringContainsString('Tribunal administratif', $custom);
+        self::assertStringContainsString('56 avenue de Saint-Cloud, 78000 Versailles', $custom);
     }
 
     public function testTemplateKeepsTheUpstreamDecisionEtablissementTitle(): void
