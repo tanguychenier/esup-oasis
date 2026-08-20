@@ -13,10 +13,13 @@ import { E2E_BASE_URL, E2E_IS_CI, E2E_SLOW_MO } from "./tests/e2e/env";
 export default defineConfig({
    testDir: "./tests/e2e",
    outputDir: "./test-results",
-   fullyParallel: true,
+   // Ces tests partagent une meme base de donnees et modifient l'etat du dossier
+   // (observations, date d'avis medical, amenagements). Ils doivent donc se
+   // derouler en serie, sans quoi ils se perturbent mutuellement.
+   fullyParallel: false,
    forbidOnly: E2E_IS_CI,
    retries: E2E_IS_CI ? 1 : 0,
-   workers: E2E_IS_CI ? 2 : undefined,
+   workers: 1,
    timeout: 60_000,
    expect: { timeout: 10_000 },
    reporter: E2E_IS_CI
